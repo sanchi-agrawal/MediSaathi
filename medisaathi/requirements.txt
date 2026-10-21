@@ -1,0 +1,6 @@
+streamlit
+pandas
+rapidfuzz
+python-dateutil
+python-dotenv
+pytest
