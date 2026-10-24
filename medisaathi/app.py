@@ -1,8 +1,11 @@
 import json
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+
+from schedule import build_schedule
 
 MOCK_PATH = Path("sample_prescriptions/mock_prescription.json")
 COLUMNS = ["name", "salt", "strength", "form", "frequency_pattern",
@@ -65,6 +68,36 @@ else:
         st.info("Confirm your medicines first.")
     else:
         t1, t2, t3 = st.tabs(["Schedule", "Prices", "Refill"])
-        t1.write("Schedule coming soon (schedule.py).")
+        start = t1.date_input("Course starts on", value=date.today())
+        results = [build_schedule(m, start) for m in st.session_state.medicines]
+
+        with t1:
+            rows = []
+            for r in results:
+                if r["status"] == "ok":
+                    d = r["doses_by_slot"]
+                    rows.append({
+                        "Medicine": r["name"],
+                        "Morning": d["morning"], "Noon": d["noon"],
+                        "Night": d["night"], "Bedtime": d["bedtime"],
+                        "Per day": r["units_per_day"],
+                        "Days": r["duration_days"],
+                        "Total": f'{r["total_units"]} {r["unit"]}',
+                        "Ends on": r["end_date"].strftime("%d %b %Y"),
+                    })
+            if rows:
+                st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+            for r in results:
+                if r["status"] != "ok":
+                    st.warning(f'{r["name"]}: {r["reason"]}')
+
         t2.write("Cheapest basket coming soon (Person 2).")
-        t3.write("Refill dates coming soon.")
+
+        with t3:
+            refills = [r for r in results if r["status"] == "ok" and r["refill_date"]]
+            if refills:
+                for r in refills:
+                    st.write(f'{r["name"]}: order again by '
+                             f'{r["refill_date"].strftime("%d %b %Y")}')
+            else:
+                st.info("No long-term medicines (30 days or more) in this prescription.")
