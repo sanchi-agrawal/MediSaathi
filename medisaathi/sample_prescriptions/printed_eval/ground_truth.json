@@ -1,0 +1,623 @@
+{
+  "schema_version": "printed-eval-v1",
+  "policy": {
+    "version": "printed-eval-v1",
+    "matching": "maximum-cardinality then minimum-total-normalized-Levenshtein",
+    "alignment_text": "raw_text; whitespace collapsed for alignment ONLY; case-sensitive",
+    "threshold": "distance / max(text lengths) <= 1/2; missing/blank raw_text has no edge",
+    "tie_break": "reference source order, then canonical JSON prediction order; ties reported",
+    "scoring": "exact value AND Python type; no case/whitespace/punctuation/spelling normalization",
+    "field_denominator": "6 * (matched + missing + extra); failures count as missing",
+    "non_null_denominator": "all non-null expected scored fields, including missing medicines",
+    "unsupported_values": "matched extraction fields expected null but predicted non-null; extras separate",
+    "review_flags": "expected incomplete records and returned incomplete/low-confidence records require true",
+    "negative_control": "separate pass requires successful empty list; extras also penalize field scores",
+    "confirmation": "mandatory for every record, independent of needs_review",
+    "weeks": "duration_days=null for weeks; never convert"
+  },
+  "rendering": {
+    "pillow_version": "13.0.0",
+    "size": [
+      1800,
+      1500
+    ],
+    "fonts": [
+      {
+        "filename": "arial.ttf",
+        "sha256": "b3658eadae55e682b5f69eb64c439c1ecc8f196c0bb8d4756d145d13bc86476a"
+      },
+      {
+        "filename": "arialbd.ttf",
+        "sha256": "e8f4e3baf6cc35fed6fcce3a540e8b39e8f6cda1d22a28f2ec8f526fef7a43f5"
+      }
+    ],
+    "banner": "FICTIONAL DEMO — NOT FOR MEDICAL USE",
+    "randomness": "none"
+  },
+  "ground_truth_fields": [
+    "raw_text",
+    "name",
+    "salt",
+    "strength",
+    "form",
+    "frequency_pattern",
+    "duration_days",
+    "timing"
+  ],
+  "confidence": "No ground-truth probability; mock 0.95 is illustrative only.",
+  "cases": [
+    {
+      "case_id": "printed_01",
+      "image": "printed_01.png",
+      "layout": "single_column",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Alba; 10 mg; OD; 3 days; after food; ingredient: Example-Ingredient-A"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Alba; 10 mg; OD; 3 days; after food; ingredient: Example-Ingredient-A",
+            "name": "Fictional-Alba",
+            "salt": "Example-Ingredient-A",
+            "strength": "10 mg",
+            "form": "tablet",
+            "frequency_pattern": "OD",
+            "duration_days": 3,
+            "timing": "after food"
+          },
+          "review_required": false
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "0f7d5a794576d0726dbb5da992dfb1eea2e6c7fb49e7e41a4b34d640724fa28b"
+    },
+    {
+      "case_id": "printed_02",
+      "image": "printed_02.png",
+      "layout": "numbered",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Bero; 20 mg; BD; 5 days",
+        "capsule; Fictional-Cavo; 5 mg; OD; 4 days",
+        "drops; Fictional-Demi; 2 mg/mL; SOS; 2 days"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Bero; 20 mg; BD; 5 days",
+            "name": "Fictional-Bero",
+            "salt": null,
+            "strength": "20 mg",
+            "form": "tablet",
+            "frequency_pattern": "BD",
+            "duration_days": 5,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule; Fictional-Cavo; 5 mg; OD; 4 days",
+            "name": "Fictional-Cavo",
+            "salt": null,
+            "strength": "5 mg",
+            "form": "capsule",
+            "frequency_pattern": "OD",
+            "duration_days": 4,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "drops; Fictional-Demi; 2 mg/mL; SOS; 2 days",
+            "name": "Fictional-Demi",
+            "salt": null,
+            "strength": "2 mg/mL",
+            "form": "drops",
+            "frequency_pattern": "SOS",
+            "duration_days": 2,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "0b9633303f08789f93ef309871dd268014d7568bfae2e327061dd43cac9837ea"
+    },
+    {
+      "case_id": "printed_03",
+      "image": "printed_03.jpg",
+      "layout": "tabular",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Elo; 15 mg TDS 3 days before food",
+        "capsule; Fictional-Favi; 25 mg BD 6 days after food",
+        "syrup; Fictional-Garo; 8 mg/5 mL OD 4 days bedtime"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Elo; 15 mg TDS 3 days before food",
+            "name": "Fictional-Elo",
+            "salt": null,
+            "strength": "15 mg",
+            "form": "tablet",
+            "frequency_pattern": "TDS",
+            "duration_days": 3,
+            "timing": "before food"
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule; Fictional-Favi; 25 mg BD 6 days after food",
+            "name": "Fictional-Favi",
+            "salt": null,
+            "strength": "25 mg",
+            "form": "capsule",
+            "frequency_pattern": "BD",
+            "duration_days": 6,
+            "timing": "after food"
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "syrup; Fictional-Garo; 8 mg/5 mL OD 4 days bedtime",
+            "name": "Fictional-Garo",
+            "salt": null,
+            "strength": "8 mg/5 mL",
+            "form": "syrup",
+            "frequency_pattern": "OD",
+            "duration_days": 4,
+            "timing": "bedtime"
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "b27aa5c13d0425b321f751b4f6eda0f3257417787b8159eb4d16c423da7eb3fa"
+    },
+    {
+      "case_id": "printed_04",
+      "image": "printed_04.png",
+      "layout": "two_column",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Havi; 12 mg; 1-0-1; 7 days",
+        "capsule; Fictional-Ilo; 6 mg; 0-0-1; 3 days"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Havi; 12 mg; 1-0-1; 7 days",
+            "name": "Fictional-Havi",
+            "salt": null,
+            "strength": "12 mg",
+            "form": "tablet",
+            "frequency_pattern": "1-0-1",
+            "duration_days": 7,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule; Fictional-Ilo; 6 mg; 0-0-1; 3 days",
+            "name": "Fictional-Ilo",
+            "salt": null,
+            "strength": "6 mg",
+            "form": "capsule",
+            "frequency_pattern": "0-0-1",
+            "duration_days": 3,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "66672267a39dd733d14a3cfb7bafb658ca477eebd36c9c3c6e7a6ebb164270cf"
+    },
+    {
+      "case_id": "printed_05",
+      "image": "printed_05.png",
+      "layout": "wrapped_line",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet;\nFictional-Javo;\n30 mg;\nBD; 5 days; after food; ingredient: Example-Ingredient-J",
+        "drops;\nFictional-Kemi;\n4 mg/mL;\nSOS; 2 days; bedtime"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet;\nFictional-Javo;\n30 mg;\nBD; 5 days; after food; ingredient: Example-Ingredient-J",
+            "name": "Fictional-Javo",
+            "salt": "Example-Ingredient-J",
+            "strength": "30 mg",
+            "form": "tablet",
+            "frequency_pattern": "BD",
+            "duration_days": 5,
+            "timing": "after food"
+          },
+          "review_required": false
+        },
+        {
+          "expected_fields": {
+            "raw_text": "drops;\nFictional-Kemi;\n4 mg/mL;\nSOS; 2 days; bedtime",
+            "name": "Fictional-Kemi",
+            "salt": null,
+            "strength": "4 mg/mL",
+            "form": "drops",
+            "frequency_pattern": "SOS",
+            "duration_days": 2,
+            "timing": "bedtime"
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "60069b2af829686526c1f1281a4150b6fc38f4c3aaf613472b8605c1283c98db"
+    },
+    {
+      "case_id": "printed_06",
+      "image": "printed_06.jpg",
+      "layout": "single_column",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Loro; 10 mg; OD; 3 days",
+        "capsule; Fictional-Mavi; 20 mg; BD; 4 days",
+        "syrup; Fictional-Nelo; 5 mg/5 mL; TDS; 5 days",
+        "drops; Fictional-Oro; 1 mg/mL; SOS; 2 days"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Loro; 10 mg; OD; 3 days",
+            "name": "Fictional-Loro",
+            "salt": null,
+            "strength": "10 mg",
+            "form": "tablet",
+            "frequency_pattern": "OD",
+            "duration_days": 3,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule; Fictional-Mavi; 20 mg; BD; 4 days",
+            "name": "Fictional-Mavi",
+            "salt": null,
+            "strength": "20 mg",
+            "form": "capsule",
+            "frequency_pattern": "BD",
+            "duration_days": 4,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "syrup; Fictional-Nelo; 5 mg/5 mL; TDS; 5 days",
+            "name": "Fictional-Nelo",
+            "salt": null,
+            "strength": "5 mg/5 mL",
+            "form": "syrup",
+            "frequency_pattern": "TDS",
+            "duration_days": 5,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "drops; Fictional-Oro; 1 mg/mL; SOS; 2 days",
+            "name": "Fictional-Oro",
+            "salt": null,
+            "strength": "1 mg/mL",
+            "form": "drops",
+            "frequency_pattern": "SOS",
+            "duration_days": 2,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "22200c43e3d24cd4f9881a01ea03b16d09aa7fd822293bfa433298dcc1601cf9"
+    },
+    {
+      "case_id": "printed_07",
+      "image": "printed_07.png",
+      "layout": "numbered",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Pavo; 7 mg; OD; 2 days",
+        "capsule; Fictional-Qemi; 9 mg; BD; 3 days",
+        "syrup; Fictional-Relo; 3 mg/5 mL; TDS; 4 days"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Pavo; 7 mg; OD; 2 days",
+            "name": "Fictional-Pavo",
+            "salt": null,
+            "strength": "7 mg",
+            "form": "tablet",
+            "frequency_pattern": "OD",
+            "duration_days": 2,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule; Fictional-Qemi; 9 mg; BD; 3 days",
+            "name": "Fictional-Qemi",
+            "salt": null,
+            "strength": "9 mg",
+            "form": "capsule",
+            "frequency_pattern": "BD",
+            "duration_days": 3,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "syrup; Fictional-Relo; 3 mg/5 mL; TDS; 4 days",
+            "name": "Fictional-Relo",
+            "salt": null,
+            "strength": "3 mg/5 mL",
+            "form": "syrup",
+            "frequency_pattern": "TDS",
+            "duration_days": 4,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "e1d64aac6ca4c374dd4980b15e78ad6659257936110c52efb790218a956ca810"
+    },
+    {
+      "case_id": "printed_08",
+      "image": "printed_08.png",
+      "layout": "single_column",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "drops; Fictional-Savi; 2 mg/mL; SOS"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "drops; Fictional-Savi; 2 mg/mL; SOS",
+            "name": "Fictional-Savi",
+            "salt": null,
+            "strength": "2 mg/mL",
+            "form": "drops",
+            "frequency_pattern": "SOS",
+            "duration_days": null,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "bd3d92c367f41a76044113cc0dba7af2530090cc9e68301e6ba683fd89e14525"
+    },
+    {
+      "case_id": "printed_09",
+      "image": "printed_09.jpg",
+      "layout": "numbered",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Toro; BD; 3 days",
+        "capsule; Fictional-Umi; OD; 4 days"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Toro; BD; 3 days",
+            "name": "Fictional-Toro",
+            "salt": null,
+            "strength": null,
+            "form": "tablet",
+            "frequency_pattern": "BD",
+            "duration_days": 3,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule; Fictional-Umi; OD; 4 days",
+            "name": "Fictional-Umi",
+            "salt": null,
+            "strength": null,
+            "form": "capsule",
+            "frequency_pattern": "OD",
+            "duration_days": 4,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "d4ccbcf2504e1f2165de68bd631e8b120b3439e7f5ed597d93e1fd94653e2377"
+    },
+    {
+      "case_id": "printed_10",
+      "image": "printed_10.png",
+      "layout": "two_column",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Velo; 10 mg",
+        "syrup; Fictional-Wavi; 5 mg/5 mL; BD"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Velo; 10 mg",
+            "name": "Fictional-Velo",
+            "salt": null,
+            "strength": "10 mg",
+            "form": "tablet",
+            "frequency_pattern": null,
+            "duration_days": null,
+            "timing": null
+          },
+          "review_required": true
+        },
+        {
+          "expected_fields": {
+            "raw_text": "syrup; Fictional-Wavi; 5 mg/5 mL; BD",
+            "name": "Fictional-Wavi",
+            "salt": null,
+            "strength": "5 mg/5 mL",
+            "form": "syrup",
+            "frequency_pattern": "BD",
+            "duration_days": null,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "7212d909efca16644406edf2fbe261ca835e1b2024a3eeadb25ca18a1892ef8e"
+    },
+    {
+      "case_id": "printed_11",
+      "image": "printed_11.png",
+      "layout": "wrapped_line",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet;\nFictional-Xoro;\n11 mg;\nOD; 6 days; before food; ingredient: Example-Ingredient-X",
+        "capsule;\nFictional-Yemi;\n13 mg;\nBD; 3 days; after food"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet;\nFictional-Xoro;\n11 mg;\nOD; 6 days; before food; ingredient: Example-Ingredient-X",
+            "name": "Fictional-Xoro",
+            "salt": "Example-Ingredient-X",
+            "strength": "11 mg",
+            "form": "tablet",
+            "frequency_pattern": "OD",
+            "duration_days": 6,
+            "timing": "before food"
+          },
+          "review_required": false
+        },
+        {
+          "expected_fields": {
+            "raw_text": "capsule;\nFictional-Yemi;\n13 mg;\nBD; 3 days; after food",
+            "name": "Fictional-Yemi",
+            "salt": null,
+            "strength": "13 mg",
+            "form": "capsule",
+            "frequency_pattern": "BD",
+            "duration_days": 3,
+            "timing": "after food"
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "e5639df9728d83151f5dba75b803ff46acb47cb0fe1fb896b4efe3479b7d85de"
+    },
+    {
+      "case_id": "printed_12",
+      "image": "printed_12.jpg",
+      "layout": "single_column",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "tablet; Fictional-Zavi; 14 mg; OD; 2 weeks"
+      ],
+      "medicines": [
+        {
+          "expected_fields": {
+            "raw_text": "tablet; Fictional-Zavi; 14 mg; OD; 2 weeks",
+            "name": "Fictional-Zavi",
+            "salt": null,
+            "strength": "14 mg",
+            "form": "tablet",
+            "frequency_pattern": "OD",
+            "duration_days": null,
+            "timing": null
+          },
+          "review_required": true
+        }
+      ],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation.",
+        "2 weeks is visible; duration_days intentionally null (reader does not convert)."
+      ],
+      "image_sha256": "70cb02be2218de0f39411ddc7edc288cf0be17f4abbeea4b807d0de4ce15b856"
+    },
+    {
+      "case_id": "printed_13",
+      "image": "printed_13.png",
+      "layout": "no_medicine",
+      "fictional": true,
+      "patient_information": "none",
+      "source_text": [
+        "No medicines listed."
+      ],
+      "medicines": [],
+      "annotation_notes": [
+        "Source text follows each medicine's reading order; visual line wrapping is not semantic.",
+        "Names and ingredient placeholders are entirely fictional. All fields require confirmation."
+      ],
+      "image_sha256": "aaa898bdf4dfa882193cf557c57678827b1ca69d97f10247a95242bebfa2986e"
+    }
+  ]
+}
