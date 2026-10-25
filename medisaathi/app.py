@@ -1,16 +1,8 @@
-import json
-from datetime import date
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
 
-from confirm_utils import (READ_ONLY_FIELDS, UNIT_OPTIONS, confirm, df_to_records,
-                           is_confirmation_current, records_to_df,
-                           review_blockers, snapshot)
-from schedule import build_schedule
-
-MOCK_PATH = Path("sample_prescriptions/mock_prescription.json")
+import ai_flow as flow
+from confirm_utils import READ_ONLY_FIELDS, UNIT_OPTIONS
 
 st.set_page_config(page_title="MediSaathi", page_icon="💊", layout="wide")
 st.markdown("<style>html, body, [class*='css'] {font-size: 18px;}</style>",
@@ -19,126 +11,115 @@ st.title("💊 MediSaathi")
 st.warning("Reminder and information tool, not medical advice. "
            "Prices shown are SAMPLE DATA collected by hand.")
 
+state = st.session_state
+flow.ensure_session(state)          # exactly one AIIntegration per session
 
-def read_prescription(image_bytes):
-    """Placeholder. Replace with reader.read_prescription once integrated."""
-    return json.loads(MOCK_PATH.read_text())
+LANGUAGE_LABELS = {"en": "English", "hi": "हिन्दी", "hinglish": "Hinglish"}
 
-
-# ---------- session state ----------
-for key, default in {"medicines": None, "file_key": None, "upload_id": 0,
-                     "confirmed_records": None, "confirmed_snapshot": None}.items():
-    st.session_state.setdefault(key, default)
-
-
-def reset_confirmation():
-    st.session_state.confirmed_records = None
-    st.session_state.confirmed_snapshot = None
-
-
-def load_medicines(records):
-    """Any new set of medicines: drop old confirmation and old editor edits."""
-    st.session_state.medicines = records
-    st.session_state.upload_id += 1      # new editor key -> old edits discarded
-    reset_confirmation()
-
+records, doses, errors, view = [], [], [], None
 
 tab_upload, tab_confirm, tab_results = st.tabs(["1. Upload", "2. Confirm", "3. Results"])
 
 # ---------- 1. Upload ----------
 with tab_upload:
     file = st.file_uploader("Photo of prescription", type=["jpg", "jpeg", "png"])
-    if file:
-        file_key = f"{file.name}:{file.size}"
-        if file_key != st.session_state.file_key:     # a different file was chosen
-            st.session_state.file_key = file_key
-            load_medicines(None)                       # clears medicines and confirmation
-        st.image(file, width=400)
-        if st.button("Read prescription"):
-            load_medicines(read_prescription(file.getvalue()))
-            st.success("Done. Open the Confirm tab.")
-    if st.button("Use sample prescription (demo)"):
-        st.session_state.file_key = None
-        load_medicines(read_prescription(None))
-        st.success("Sample loaded. Open the Confirm tab.")
+    flow.sync_upload(state, file.getvalue() if file else None)   # new/removed file -> fresh analysis
+    if st.button("Use sample prescription (demo)", key="ai_sample"):
+        flow.load_sample(state)
+    if state["ai_image_bytes"]:
+        st.image(state["ai_image_bytes"], width=400)
+    if state["ai_status"] == "ready":
+        if st.button("Analyze prescription", key="ai_analyze"):   # the only extraction trigger
+            flow.analyze(state)
+    if state["ai_status"] == "failed":
+        if st.button("Retry extraction", key="ai_retry"):
+            flow.retry(state)
+    if state["ai_error"]:
+        st.error(state["ai_error"]["message"])
+    if state["ai_status"] == "extracted":
+        st.success("Done. Open the Confirm tab.")
 
 # ---------- 2. Confirm ----------
 with tab_confirm:
-    if not st.session_state.medicines:
-        st.info("Upload a prescription first.")
+    if state["ai_status"] != "extracted":
+        st.info("Upload a prescription and click Analyze first.")
     else:
         st.caption("Check every row against the prescription. Fix anything wrong. "
                    "Blank or unclear fields: please check with your doctor. "
-                   "Untick 'needs_review' on a row only after you have checked it.")
-        df = records_to_df(st.session_state.medicines)
+                   "'needs_review' is the reader's own flag; it is not your confirmation. "
+                   "dose_quantity and dose_unit are your own notes, kept separate from the "
+                   "prescription record.")
+        with st.expander("Prescription image", expanded=True):
+            st.image(state["ai_image_bytes"], width=400)
+        with st.expander("What the AI originally read (read-only)"):
+            st.dataframe(pd.DataFrame(flow.original_records(state), columns=list(flow.FIELDS)),
+                         hide_index=True)
+
+        df = pd.DataFrame(flow.baseline_rows(state), columns=list(flow.EDITOR_COLUMNS)).astype({
+            "duration_days": "Int64", "confidence": "float64",
+            "dose_quantity": "float64", "needs_review": "bool"})
         edited = st.data_editor(
             df, num_rows="dynamic", width="stretch", disabled=READ_ONLY_FIELDS,
-            key=f"editor_{st.session_state.upload_id}",
+            key=f"editor_{state['ai_generation']}",
             column_config={
+                "form": st.column_config.SelectboxColumn(options=list(flow.FORM_OPTIONS)),
                 "duration_days": st.column_config.NumberColumn(min_value=1, step=1),
+                "confidence": st.column_config.NumberColumn(min_value=0.0, max_value=1.0),
                 "dose_quantity": st.column_config.NumberColumn(
                     "dose_quantity", min_value=0.0, help="How much per dose, as written on the prescription"),
                 "dose_unit": st.column_config.SelectboxColumn(
                     "dose_unit", options=UNIT_OPTIONS, help="Unit for that quantity"),
                 "needs_review": st.column_config.CheckboxColumn(
-                    help="Tick means 'not checked yet'. Untick after checking."),
+                    default=True, help="The reader's flag. Ticking or unticking it does not confirm anything."),
             })
-        current = df_to_records(edited)
+        records, doses, errors = flow.frame_to_state(edited.to_dict("records"), UNIT_OPTIONS)
+        view = flow.current_view(records, doses, errors)
 
-        # Any change after confirming cancels the confirmation.
-        if (st.session_state.confirmed_snapshot is not None
-                and not is_confirmation_current(st.session_state.confirmed_snapshot, current)):
-            reset_confirmation()
+        if flow.sync_review(state, records, doses, errors):
             st.warning("You changed something after confirming. Please confirm again.")
+        if errors:
+            st.error("Fix these before confirming: " + " ".join(errors))
 
-        blockers = review_blockers(current)
-        if blockers:
-            st.error("Still needs your review: " + ", ".join(blockers))
-
-        if st.button("Confirm all", disabled=bool(blockers)):
-            st.session_state.confirmed_records = confirm(current)
-            st.session_state.confirmed_snapshot = snapshot(current)
-
-        if st.session_state.confirmed_snapshot is not None:
+        needs_tick = bool(not errors and flow.needs_acknowledgement(records))
+        ticked = True
+        if needs_tick:
+            ticked = st.checkbox(
+                "I checked the blank or unclear values (and rows still marked needs_review) "
+                "against my prescription. Blank values stay unknown.",
+                key=f"ai_ack_{state['ai_generation']}_{view[:12]}")
+        if st.button("Confirm all", key="ai_confirm", disabled=bool(errors) or (needs_tick and not ticked)):
+            try:
+                flow.confirm(state, records, doses, errors, unknowns_acknowledged=ticked)
+            except flow.FlowError as problem:
+                st.error(problem.message)
+        if flow.is_confirmed(state, view):
             st.success("Confirmed. Open the Results tab.")
 
 # ---------- 3. Results ----------
 with tab_results:
-    confirmed = st.session_state.confirmed_records
-    if not confirmed:
+    if not flow.is_confirmed(state, view):
         st.info("Confirm your medicines first.")
     else:
-        t1, t2, t3 = st.tabs(["Schedule", "Prices", "Refill"])
-        start = t1.date_input("Course starts on", value=date.today())
-        results = [build_schedule(m, start) for m in confirmed]
-
-        with t1:
-            rows = []
-            for r in results:
-                if r["status"] == "ok":
-                    d = r["doses_by_slot"]
-                    rows.append({
-                        "Medicine": r["name"],
-                        "Morning": d["morning"], "Noon": d["noon"],
-                        "Night": d["night"], "Bedtime": d["bedtime"],
-                        "Per day": f'{r["units_per_day"]} {r["unit"]}',
-                        "Days": r["duration_days"],
-                        "Total": f'{r["total_units"]} {r["unit"]}',
-                        "Ends on": r["end_date"].strftime("%d %b %Y"),
-                    })
-            if rows:
-                st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
-            for r in results:
-                if r["status"] != "ok":
-                    st.warning(f'{r["name"]}: {r["reason"]}')
-
-        t2.write("Cheapest basket coming soon (Person 2).")
-
-        with t3:
-            refills = [r for r in results if r["status"] == "ok" and r["refill_date"]]
-            if refills:
-                for r in refills:
-                    st.write(f'{r["name"]}: order again by '
-                             f'{r["refill_date"].strftime("%d %b %Y")}')
+        t_explain, t1, t2, t3 = st.tabs(["Explanation", "Schedule", "Prices", "Refill"])
+        with t_explain:
+            language = st.radio("Language", list(LANGUAGE_LABELS), key="ai_language", horizontal=True,
+                                format_func=LANGUAGE_LABELS.get)
+            try:
+                result = flow.get_explanation(state, view, language)
+            except flow.FlowError as problem:
+                st.error(problem.message)
             else:
-                st.info("No long-term medicines (30 days or more) in this prescription.")
+                st.text(result["notice"])        # plain-text widgets only: values are untrusted
+                if result["status"] == "empty":
+                    st.info("No medicines were read. The confirmed list is empty.")
+                for item in result["medicines"]:
+                    lines = [f"Medicine {item['record_index'] + 1}"]
+                    lines += [field["text"] for field in item["fields"]]
+                    if item["glossary"]:
+                        lines.append(item["glossary"]["text"])
+                    st.text("\n".join(lines))
+                if result["issues"]:
+                    st.text("\n".join(f"Medicine {i['record_index'] + 1}: {i['text']}"
+                                      for i in result["issues"]))
+        for tab in (t1, t2, t3):
+            tab.info("Not active in this version. Schedule, prices and refill alerts come in a later step.")
