@@ -1,0 +1,14 @@
+.venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+*.pyc
+smoke/live_result.json
+smoke/attempts/
+smoke/.live_result.json.*.tmp
+smoke/attempts/*/execution_authorization.json
+smoke/attempts/*/consumed.json
+smoke/attempts/*/diagnostic_result.json
+smoke/attempts/*/.diagnostic_result.json.*.tmp

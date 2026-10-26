@@ -1,0 +1,10 @@
+.strip-results{margin-top:25px}
+.strip-results>p,.strip-results article>p{font-size:11px;line-height:1.9;margin-block:12px}
+.strip-results h3{font-size:15px;margin-block:20px 12px}
+.expiry-reading{border:1px solid var(--line);border-radius:10px;background:#278dda09;padding:22px;margin-top:24px}
+.expiry-reading strong{font-size:24px;letter-spacing:-.03em;color:#b7d8ef}
+.expiry-reading p{font-size:11px;margin-top:10px}
+.strip-issues{padding:4px 18px 18px;border:1px solid #ff596724;border-radius:10px;background:#ff596707;margin-block:20px}
+.strip-issues ul{font-size:11px;color:#ddb6b9;padding-left:18px;line-height:2;list-style:disc}
+.strip-issues p{font-size:11px}
+.strip-results .source-text p{white-space:pre-wrap;overflow-wrap:anywhere}
