@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Camera, CheckCircle2, FileImage, RotateCw, Upload, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { validateImage } from '../lib/image'
 
-export default function ImageUploader({ label = 'Prescription image', onChange }: { label?: string; onChange: (file: File | null) => void }) {
+export default function ImageUploader({ label = 'Prescription image', onChange, restoredFile }: { label?: string; onChange: (file: File | null) => void; restoredFile?:File|null }) {
   const uploadRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
   const generation = useRef(0)
@@ -16,6 +16,7 @@ export default function ImageUploader({ label = 'Prescription image', onChange }
   const [dragging,setDragging] = useState(false)
   useEffect(()=>{if(!file){setUrl('');return}const next=URL.createObjectURL(file);setUrl(next);return()=>URL.revokeObjectURL(next)},[file])
   useEffect(()=>()=>{generation.current++},[])
+  useEffect(()=>{if(restoredFile){generation.current++;setFile(restoredFile);setError('');setChecking(false);setDimensions('Restored from current server session');setZoom(1);setRotation(0)}},[restoredFile])
   async function choose(next:File|undefined) {
     if(!next)return
     const current=++generation.current

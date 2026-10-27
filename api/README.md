@@ -1,5 +1,11 @@
 # MediSaathi 13E · medicines HTTP adapter
 
+**Milestone 14E:** current-session records and source images can be restored without OCR; confirmed explanations include localized summaries. See [WORKSPACE_14E.md](WORKSPACE_14E.md). Authentication is still demo-only and storage is session-memory only. The conditional account/database follow-up is specified in [ACCOUNTS_PLAN_14E.md](ACCOUNTS_PLAN_14E.md); no durable account history is claimed.
+
+**Milestone 14D:** scheduling HTTP failures now retain a safe category/status, and health reports loaded-contract/configuration presence without credentials or provider calls. See [BROWSER_14D.md](BROWSER_14D.md) for findings, runtime checks and the isolated no-Gemini browser procedure. The historical browser failure's HTTP status was not retained; no scheduler arithmetic defect was reproduced.
+
+**Milestone 14C:** the normal API now supports guarded medication associations, separate schedule-plan review/approval and Person 3's unchanged calculation engine. See [SCHEDULING_14C.md](SCHEDULING_14C.md) for routes, strict handoffs, unsupported cases, exact files and manual verification. No reminder delivery or pricing is enabled.
+
 **Checkpoint 14B:** see [CHECKPOINT_14B.md](CHECKPOINT_14B.md) for the reviewed source inventory, AI provenance and runtime exclusions. Historical smoke readiness reports are records of earlier milestones, not new execution authorization; guards and authorization artifacts are deliberately absent from Git. The current normal API includes the independent 13K and 13L scopes described below.
 
 **Milestone 13L:** the normal API now includes an isolated medicine-strip OCR/review/confirmation workflow. See [STRIP_13L.md](STRIP_13L.md) for routes, raw-only review contracts, session retention details, tests and remaining manual verification. Guarded diagnostic launchers remain medicines-only.
@@ -65,7 +71,7 @@ All mutation requests require an exact allowed `Origin` and `X-MediSaathi-Action
 | `POST /api/prescriptions/{id}/confirm` | `{revision}` | Register and consume a server-owned acknowledgement event |
 | `POST /api/prescriptions/{id}/explanation` | `{revision, language}` | Existing confirmed-snapshot explanation, bound to analysis/revision |
 
-No scheduling, reminder, matching or pricing routes are exposed. Instruction/investigation and strip routes were added in 13K/13L; see the linked scope documentation above. Existing authentication screens stay demo-only.
+Scheduling routes were added in 14C; see SCHEDULING_14C.md above. No reminder delivery, matching or pricing routes are exposed. Instruction/investigation and strip routes were added in 13K/13L; see the linked scope documentation above. Existing authentication screens stay demo-only.
 
 ## Session and concurrency model
 

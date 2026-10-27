@@ -1,5 +1,9 @@
 # MediSaathi frontend · Milestones 13D / 13E
 
+**Milestone 14E:** Analysis, Medicines and Investigations restore the current server workspace; Hindi/Hinglish selection loads real confirmed explanation content. See [api/WORKSPACE_14E.md](../api/WORKSPACE_14E.md). Login/signup remain explicitly demo-only; refresh/navigation restoration is not durable account storage.
+
+**Milestone 14C:** `/dashboard/schedule` now connects explicit medicine/instruction associations, saved input review and separately approved server scheduling. See [api/SCHEDULING_14C.md](../api/SCHEDULING_14C.md). No notification delivery is enabled; authentication remains demo-only.
+
 **Milestone 13L:** `/dashboard/expiry` now connects strip upload, OCR, raw-label review, conservative server-side reparsing and explicit confirmation. See [api/STRIP_13L.md](../api/STRIP_13L.md). Browser and live strip OCR verification remain pending; no safety-to-take judgment or prescription association is supplied.
 
 **Milestone 13K:** prescription-analysis checkboxes now connect medicines, dosage instructions and prescribed investigations to independent API operations and review/confirmation panels. See [api/SECTIONS_13K.md](../api/SECTIONS_13K.md). Instructions/investigations below are no longer inactive in the normal prescription API; separate dashboard summaries and guarded diagnostic-server capabilities remain limited as documented.

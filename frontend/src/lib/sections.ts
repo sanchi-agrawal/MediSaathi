@@ -1,5 +1,6 @@
 import type { InstructionEnvelope, InvestigationEnvelope } from './api'
 import { ApiError } from './prescriptions'
+import { invalidateSchedulingView } from './workflowEvents'
 
 export type ExtraScope='instructions'|'investigations'
 export type ExtraPayload=InstructionEnvelope|InvestigationEnvelope
@@ -49,6 +50,7 @@ export function parseSection(value:unknown,scope:ExtraScope,analysisId:string):S
 }
 export function createSectionClient(fetcher:typeof fetch=(...args)=>fetch(...args)) {
   async function request(analysis:string,scope:ExtraScope,action='',method='GET',body?:unknown,signal?:AbortSignal){
+    if(scope==='instructions'&&method!=='GET'&&action!=='/confirm')invalidateSchedulingView()
     let response:Response
     try{response=await fetcher(`/api/prescriptions/${encodeURIComponent(analysis)}/sections/${scope}${action}`,{
       method,signal,credentials:'include',cache:'no-store',headers:{'X-MediSaathi-Action':'review',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined})}

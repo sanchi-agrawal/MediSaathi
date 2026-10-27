@@ -24,8 +24,18 @@ class DemoSession:
     prescription_active: bool = False
     strip_active: bool = False
     strip_state: dict = field(default_factory=dict)
+    scheduling_revision: str = field(default_factory=lambda: secrets.token_urlsafe(24))
+    scheduling_state: dict = field(default_factory=dict)
+    prescription_image: bytes | None = None
+    prescription_mime: str | None = None
+
+    def invalidate_scheduling(self):
+        self.ai.clear_associations()
+        self.scheduling_revision = secrets.token_urlsafe(24)
+        self.scheduling_state = {}
 
     def invalidate(self):
+        self.invalidate_scheduling()
         self.revision = secrets.token_urlsafe(24)
         self.reviewed = False
         self.confirmed_revision = None

@@ -80,6 +80,9 @@ def register_section_routes(app, store, enabled_sections):
             if status not in ("not_requested","failed"):
                 reject(409,"invalid_state","Only a new or failed section may be explicitly analyzed.")
             invalidate(state)
+            session.explanation = None
+            if scope == "instructions":
+                session.invalidate_scheduling()
             job=session.ai.begin_section(scope,analysis_id=analysis_id,retry=status=="failed")
             adapter=session.ai
         started=perf_counter();measurements=Measurements()
@@ -96,6 +99,9 @@ def register_section_routes(app, store, enabled_sections):
         with session.lock:
             snap,state=current(session,analysis_id,scope,body.revision)
             invalidate(state)
+            session.explanation = None
+            if scope == "instructions":
+                session.invalidate_scheduling()
             return section_view(session,snap,scope)
 
     @app.put(prefix+"/review")
@@ -104,6 +110,9 @@ def register_section_routes(app, store, enabled_sections):
         with session.lock:
             _,state=current(session,analysis_id,scope,body.revision)
             invalidate(state)
+            session.explanation = None
+            if scope == "instructions":
+                session.invalidate_scheduling()
             records=body.payload.get(scope)
             if type(records) is not list or len(records)>200:
                 reject(422,"invalid_input","Use the current section envelope with at most 200 records.")

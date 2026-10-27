@@ -1,4 +1,6 @@
 import type { Language, MedicineRecord } from './api'
+import { invalidateSchedulingView } from './workflowEvents'
+import type { ExtraScope,SectionSnapshot } from './sections'
 
 export const MEDICINE_FIELDS = ['raw_text','name','salt','strength','form','frequency_pattern','duration_days','timing','confidence','needs_review'] as const
 export interface AnalysisSnapshot {
@@ -8,12 +10,18 @@ export interface AnalysisSnapshot {
   error: { category: string; message: string } | null
   reviewed: boolean; confirmed: boolean
   performance?: Record<string,number>
+  sections?: Partial<Record<ExtraScope,SectionSnapshot>>
+}
+export interface ConfirmedSummary {
+  schema_version:'confirmed-prescription-summary-v1';language:Language;title:string;notice:string;medicine_count:number
+  sections:Record<'instructions'|'investigations',{title:string;confirmed:boolean;issues:string[];records:{record_id:string;original_text:string|null;fields:{field:string;label:string;value:string|null;is_unknown:boolean;text:string}[];uncertainty_reasons:string[];needs_review:boolean}[]}>
 }
 export interface ExplanationPayload {
   schema_version: 'prescription-explanation-v1'; status: 'empty' | 'explained'; language: Language
   records_fingerprint: string
   medicines: {record_index:number; fields:{field:string; label:string; text:string; display_value:string; is_unknown:boolean}[]; glossary:{text:string}|null}[]
   issues: {record_index:number;field:string;code:string;text:string}[]; notice: string
+  summary?: ConfirmedSummary
 }
 export class ApiError extends Error {
   constructor(public category:string,message:string,public status=0){super(message)}
@@ -46,6 +54,7 @@ function parseExplanation(value:unknown):ExplanationPayload {
 }
 export function createPrescriptionClient(fetcher:typeof fetch=(...args)=>fetch(...args)) {
   async function request(path:string,method='GET',body?:unknown,signal?:AbortSignal) {
+    if(method!=='GET'&&path.startsWith('/prescriptions')&&!path.endsWith('/confirm')&&!path.endsWith('/explanation'))invalidateSchedulingView()
     let response:Response
     try {response=await fetcher(`/api${path}`,{method,credentials:'include',cache:'no-store',signal,
       headers:{'X-MediSaathi-Action':'review',...(body instanceof File?{'Content-Type':body.type||'image/png'}:body!==undefined?{'Content-Type':'application/json'}:{})},
@@ -58,13 +67,34 @@ export function createPrescriptionClient(fetcher:typeof fetch=(...args)=>fetch(.
   }
   const path=(data:AnalysisSnapshot)=>`/prescriptions/${encodeURIComponent(data.analysis_id)}`
   return {
+    async current(signal?:AbortSignal):Promise<AnalysisSnapshot|null>{try{return parseSnapshot(await request('/prescriptions/current','GET',undefined,signal))}catch(e){if(e instanceof ApiError&&(e.status===401||e.status===404&&e.category==='no_current_prescription'))return null;throw e}},
+    async image(data:AnalysisSnapshot,signal?:AbortSignal):Promise<File>{
+      const response=await fetcher('/api/prescriptions/current/image?'+new URLSearchParams({analysis_id:data.analysis_id,revision:data.revision}),{credentials:'include',cache:'no-store',signal})
+      if(!response.ok)throw new ApiError('image_unavailable','The current source image could not be restored. Refresh the server state before reviewing.',response.status)
+      const blob=await response.blob()
+      if(!['image/png','image/jpeg'].includes(blob.type))throw new ApiError('invalid_response','The restored image has an invalid format.')
+      return new File([blob],blob.type==='image/png'?'current-prescription.png':'current-prescription.jpg',{type:blob.type})
+    },
     async upload(file:File,signal?:AbortSignal){await request('/session','POST',undefined,signal);return parseSnapshot(await request('/prescriptions','POST',file,signal))},
     async analyze(data:AnalysisSnapshot,signal?:AbortSignal){return parseSnapshot(await request(`${path(data)}/analyze`,'POST',{revision:data.revision},signal))},
     async status(data:AnalysisSnapshot,signal?:AbortSignal){return parseSnapshot(await request(path(data),'GET',undefined,signal))},
     async invalidate(data:AnalysisSnapshot){return parseSnapshot(await request(`${path(data)}/invalidate`,'POST',{revision:data.revision}))},
     async review(data:AnalysisSnapshot,records:MedicineRecord[]){if(!records.every(isMedicine))throw new ApiError('invalid_input','Check medicine field types. Blank text must be unknown.');return parseSnapshot(await request(`${path(data)}/review`,'PUT',{revision:data.revision,records}))},
     async confirm(data:AnalysisSnapshot){return parseSnapshot(await request(`${path(data)}/confirm`,'POST',{revision:data.revision}))},
-    async explain(data:AnalysisSnapshot,language:Language){const result=await request(`${path(data)}/explanation`,'POST',{revision:data.revision,language}) as {revision?:string;analysis_id?:string;payload?:unknown};if(result.revision!==data.revision||result.analysis_id!==data.analysis_id)throw new ApiError('stale_result','The explanation is no longer current.');return parseExplanation(result.payload)},
+    async explain(data:AnalysisSnapshot,language:Language):Promise<ExplanationPayload>{
+      const result=await request(`${path(data)}/explanation`,'POST',{revision:data.revision,language}) as {revision?:string;analysis_id?:string;payload?:unknown;summary?:ConfirmedSummary}
+      if(result.revision!==data.revision||result.analysis_id!==data.analysis_id)throw new ApiError('stale_result','The explanation is no longer current.')
+      const payload=parseExplanation(result.payload)
+      if(payload.language!==language)throw new ApiError('invalid_response','The explanation language did not match your selection.')
+      if(result.summary){
+        const s=result.summary
+        if(s.schema_version!=='confirmed-prescription-summary-v1'||s.language!==language||typeof s.title!=='string'||typeof s.notice!=='string'||s.medicine_count!==payload.medicines.length||!s.sections||!['instructions','investigations'].every(scope=>{
+          const section=s.sections[scope as keyof typeof s.sections]
+          return section&&typeof section.title==='string'&&typeof section.confirmed==='boolean'&&Array.isArray(section.issues)&&section.issues.every(v=>typeof v==='string')&&Array.isArray(section.records)&&(!section.confirmed?section.records.length===0:section.records.every(r=>typeof r.record_id==='string'&&(r.original_text===null||typeof r.original_text==='string')&&typeof r.needs_review==='boolean'&&Array.isArray(r.uncertainty_reasons)&&r.uncertainty_reasons.every(v=>typeof v==='string')&&Array.isArray(r.fields)&&r.fields.every(f=>typeof f.field==='string'&&typeof f.label==='string'&&typeof f.text==='string'&&(f.value===null||typeof f.value==='string')&&f.is_unknown===(f.value===null))))
+        }))throw new ApiError('invalid_response','The confirmed prescription summary was invalid.')
+      }
+      return {...payload,summary:result.summary}
+    },
     async clear(){await request('/prescriptions/current','DELETE')},
   }
 }

@@ -12,9 +12,9 @@ const record:MedicineRecord={raw_text:'Fictional-A BD',name:'Fictional-A',salt:n
 const snapshot:AnalysisSnapshot={analysis_id:'analysis-a',revision:'revision-a',status:'succeeded',original_records:[record],records:[record],error:null,reviewed:false,confirmed:false}
 const explained:ExplanationPayload={schema_version:'prescription-explanation-v1',status:'explained',language:'en',records_fingerprint:'example',medicines:[{record_index:0,fields:[{field:'name',label:'Name',text:'Medicine name: Fictional-A',display_value:'Fictional-A',is_unknown:false}],glossary:null}],issues:[],notice:'Confirmed text only. Not medical advice.'}
 function client():PrescriptionClient {
-  return {upload:vi.fn(async()=>({...snapshot,status:'not_requested' as const,records:null,original_records:null})),analyze:vi.fn(async()=>snapshot),status:vi.fn(async()=>snapshot),
+  return {current:vi.fn(async()=>null),image:vi.fn(),upload:vi.fn(async()=>({...snapshot,status:'not_requested' as const,records:null,original_records:null})),analyze:vi.fn(async()=>snapshot),status:vi.fn(async()=>snapshot),
     invalidate:vi.fn(async()=>({...snapshot,revision:'invalidated'})),review:vi.fn(async(data,records)=>({...data,records,revision:'reviewed',reviewed:true,confirmed:false})),
-    confirm:vi.fn(async(data)=>({...data,confirmed:true})),explain:vi.fn(async()=>explained),clear:vi.fn(async()=>{})}
+    confirm:vi.fn(async(data)=>({...data,confirmed:true})),explain:vi.fn(async(_s,language)=>({...explained,language})),clear:vi.fn(async()=>{})}
 }
 async function start(api:PrescriptionClient){
   render(<PrescriptionFlow client={api}/>)
@@ -77,20 +77,20 @@ describe('real prescription page workflow with offline client',()=>{
     expect(screen.getByText('Extraction confidence (uncalibrated)')).toBeTruthy()
     expect(screen.getByText('Extraction review flag')).toBeTruthy()
     expect(api.review).toHaveBeenCalledWith(snapshot,[record])
-    await user.click(screen.getByRole('button',{name:'Explain confirmed medicines'}))
+    await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     expect(await screen.findByText(explained.notice)).toBeTruthy()
     expect(api.explain).toHaveBeenCalledWith(expect.objectContaining({confirmed:true}),'en')
   })
   it('removes confirmation/explanation immediately on edit and invalidates the server',async()=>{
     const api=client();const user=await saveAndConfirm(api)
     await screen.findByRole('button',{name:'Confirmed by server'})
-    await user.click(screen.getByRole('button',{name:'Explain confirmed medicines'}))
+    await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     await screen.findByText(explained.notice)
     fireEvent.change(screen.getByLabelText('Medicine name 1'),{target:{value:'Corrected fictional text'}})
     expect(screen.queryByText(explained.notice)).toBeNull()
     expect((screen.getByRole('button',{name:'Confirm medicines'}) as HTMLButtonElement).disabled).toBe(true)
     await waitFor(()=>expect(api.invalidate).toHaveBeenCalledOnce())
-    expect((screen.getByRole('button',{name:'Explain confirmed medicines'}) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}) as HTMLButtonElement).disabled).toBe(true)
   })
   it('does not show server confirmation when confirm fails',async()=>{
     const api=client();api.confirm=vi.fn(async()=>{throw new ApiError('stale_result','Review current records.')})
@@ -102,7 +102,7 @@ describe('real prescription page workflow with offline client',()=>{
   it('does not re-extract or clear a successful confirmed scope on another click',async()=>{
     const api=client();const user=await saveAndConfirm(api)
     await screen.findByRole('button',{name:'Confirmed by server'})
-    await user.click(screen.getByRole('button',{name:'Explain confirmed medicines'}))
+    await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     await screen.findByText(explained.notice)
     const button=screen.getByRole('button',{name:'Analyze with AI'})
     expect((button as HTMLButtonElement).disabled).toBe(true)
@@ -135,11 +135,11 @@ describe('real prescription page workflow with offline client',()=>{
     const api=client();const user=await saveAndConfirm(api)
     await screen.findByRole('button',{name:'Confirmed by server'})
     await user.click(screen.getByRole('button',{name:'हिन्दी'}))
-    await user.click(screen.getByRole('button',{name:'Explain confirmed medicines'}))
+    await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     await waitFor(()=>expect(api.explain).toHaveBeenLastCalledWith(expect.anything(),'hi'))
     await waitFor(()=>expect((screen.getByRole('button',{name:'Hinglish'}) as HTMLButtonElement).disabled).toBe(false))
     await user.click(screen.getByRole('button',{name:'Hinglish'}))
-    await user.click(screen.getByRole('button',{name:'Explain confirmed medicines'}))
+    await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     await waitFor(()=>expect(api.explain).toHaveBeenLastCalledWith(expect.anything(),'hinglish'))
   })
 })

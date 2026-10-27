@@ -1,4 +1,4 @@
-"""Prescription OCR adapter. Never exposes trusted events or scheduling/pricing."""
+"""Guarded prescription OCR and offline scheduling; no pricing or delivery."""
 import os
 from io import BytesIO
 from time import perf_counter
@@ -7,7 +7,7 @@ from PIL import Image
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
@@ -17,6 +17,9 @@ from .sessions import COOKIE, TTL_SECONDS, SessionStore
 from .ocr_metrics import Measurements, elapsed_ms, log_metrics
 from .section_routes import EXTRA_SCOPES, register_section_routes, section_view
 from .strip_routes import register_strip_routes
+from .downstream.scheduling import integration_factory
+from .downstream_routes import register_downstream_routes
+from .prescription_summary import build_summary
 
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
 
@@ -25,7 +28,7 @@ def fail(status, category, message):
     raise HTTPException(status, detail={"category": category, "message": message})
 
 
-def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_validator=None,
+def create_app(*, factory=integration_factory, origins=None, session_limit=64, upload_validator=None,
                enabled_sections=("medicines", "instructions", "investigations", "strip")):
     app = FastAPI(title="MediSaathi local demo API", docs_url=None, redoc_url=None)
     store = SessionStore(factory, limit=session_limit)
@@ -33,6 +36,7 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
     app.state.enabled_sections = tuple(enabled_sections)
     register_section_routes(app,store,enabled_sections)
     register_strip_routes(app,store,enabled_sections)
+    register_downstream_routes(app,store,enabled_sections)
     allowed = tuple(origins or os.getenv("MEDISAATHI_ORIGINS", ",".join(DEFAULT_ORIGINS)).split(","))
     if any(origin == "*" for origin in allowed):
         raise ValueError("Explicit frontend origins are required")
@@ -64,6 +68,8 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
         status = 409 if error.category in ("stale_result", "invalid_state", "confirmation_required") else 422
         if error.category == "downstream_error":
             status = 502
+        if error.category == "unavailable":
+            status = 503
         return JSONResponse({"detail": {"category": error.category, "message": str(error)}}, status)
 
     def session_for(request):
@@ -94,7 +100,17 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "mode": "local-demo", "scopes": list(enabled_sections)}
+        # Presence-only local readiness. Configuration lookup never constructs a
+        # provider client or makes a model-list/extraction request.
+        try:
+            reader._configuration()
+            configured = True
+        except reader.ReaderConfigurationError:
+            configured = False
+        return {"status": "ok", "mode": "local-demo", "scopes": list(enabled_sections),
+                "api_contract": "medisaathi-14d", "gemini_configured": configured,
+                "workspace_contract": "restore-summary-v1", "storage": "session-memory", "authentication": "demo-only",
+                "scheduling_contract": "review-approve-v1" if {"medicines", "instructions"}.issubset(enabled_sections) else None}
 
     @app.post("/api/session")
     def start_session(request: Request):
@@ -109,6 +125,26 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
         response.set_cookie(COOKIE, token, max_age=TTL_SECONDS, secure=True, httponly=True, samesite="strict", path="/api")
         return response
 
+    # Register static current/image routes before the {analysis_id} route.
+    @app.get("/api/prescriptions/current")
+    def current_prescription(request: Request):
+        session = session_for(request)
+        with session.lock:
+            if not session.prescription_active or session.ai.snapshot()["prescription"] is None:
+                fail(404, "no_current_prescription", "No current prescription in this demo session.")
+            return view(session)
+
+    @app.get("/api/prescriptions/current/image")
+    def current_image(request: Request, analysis_id: str, revision: str):
+        session = session_for(request)
+        with session.lock:
+            root = session.ai.snapshot()["prescription"]
+            current(session, analysis_id, revision)
+            if not session.prescription_active or root is None or session.prescription_image is None:
+                fail(404, "no_current_prescription", "No current prescription image in this demo session.")
+            return Response(session.prescription_image, media_type=session.prescription_mime,
+                            headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
+
     @app.delete("/api/prescriptions/current")
     def clear(request: Request):
         session = session_for(request)
@@ -119,6 +155,8 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
             session.invalidate()
             session.performance = {}
             session.section_states = {}
+            session.prescription_image = None
+            session.prescription_mime = None
         return {"status": "cleared"}
 
     @app.post("/api/prescriptions")
@@ -141,12 +179,16 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
                     if upload_validator is not None:
                         upload_validator(bytes(data))
                     session.invalidate()
-                    session.ai.start_prescription(bytes(data))
+                    raw_image = bytes(data)
+                    session.prescription_image = None
+                    session.ai.start_prescription(raw_image)
+                    session.prescription_image = raw_image
                     session.prescription_active = True
                     session.section_states = {}
                 # Dimensions are read only after authoritative full validation.
                 with Image.open(BytesIO(data)) as image:
                     width, height = image.size
+                    session.prescription_mime = "image/png" if image.format == "PNG" else "image/jpeg"
                 session.performance = {"upload_ms": elapsed_ms(started),
                     "upload_validation_ms": measurements.snapshot()["image_validation_ms"],
                     "image_bytes": len(data), "image_width": width, "image_height": height,
@@ -238,7 +280,8 @@ def create_app(*, factory=AIIntegration, origins=None, session_limit=64, upload_
                 fail(409, "confirmation_required", "Confirm the current reviewed snapshot first.")
             result = session.ai.explain(language=body.language)
             session.explanation = result
-            return {"analysis_id": analysis_id, "revision": session.revision, **result}
+            return {"analysis_id": analysis_id, "revision": session.revision, **result,
+                    "summary": build_summary(session, body.language, enabled_sections)}
 
     return app
 

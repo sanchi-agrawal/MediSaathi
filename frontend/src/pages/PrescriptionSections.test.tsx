@@ -26,7 +26,7 @@ function state(scope:ExtraScope,success=false):SectionSnapshot {
 }
 const medicine:AnalysisSnapshot={analysis_id:'a',revision:'m-r',status:'not_requested',records:null,original_records:null,error:null,reviewed:false,confirmed:false}
 function clients(){
-  const client:PrescriptionClient={upload:vi.fn(async()=>medicine),analyze:vi.fn(async()=>({...medicine,status:'succeeded',records:[],original_records:[]} as AnalysisSnapshot)),
+  const client:PrescriptionClient={current:vi.fn(async()=>null),image:vi.fn(),upload:vi.fn(async()=>medicine),analyze:vi.fn(async()=>({...medicine,status:'succeeded',records:[],original_records:[]} as AnalysisSnapshot)),
     status:vi.fn(async()=>medicine),review:vi.fn(async s=>({...s,reviewed:true})),confirm:vi.fn(async s=>({...s,confirmed:true})),
     invalidate:vi.fn(async s=>({...s,confirmed:false,reviewed:false})),explain:vi.fn(),clear:vi.fn(async()=>{})}
   const sections:SectionClient={status:vi.fn(async(_id,scope)=>state(scope)),analyze:vi.fn(async s=>state(s.scope,true)),
