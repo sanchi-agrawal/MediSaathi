@@ -1,0 +1,11 @@
+catalog_id,name,salt,strength,form,pack_size
+MED001,Dolo 650,Paracetamol,650 mg,tablet,15
+MED002,Cetirizine 10 mg,Cetirizine,10 mg,tablet,10
+MED003,Paracetamol 500 mg,Paracetamol,500 mg,tablet,10
+MED004,Azithromycin 500 mg,Azithromycin,500 mg,tablet,3
+MED005,ORS Sachet,Oral Rehydration Salts,WHO formula,sachet,1
+MED006,Vitamin C 500 mg,Ascorbic Acid,500 mg,tablet,10
+MED007,Omeprazole 20 mg,Omeprazole,20 mg,capsule,10
+MED008,Ibuprofen 200 mg,Ibuprofen,200 mg,tablet,10
+MED009,Amoxicillin 500 mg,Amoxicillin,500 mg,capsule,10
+MED010,Calcium 500 mg,Calcium Carbonate,500 mg,tablet,10
