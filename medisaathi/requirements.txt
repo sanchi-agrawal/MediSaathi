@@ -4,3 +4,4 @@ rapidfuzz
 python-dateutil
 python-dotenv
 pytest
+reportlab

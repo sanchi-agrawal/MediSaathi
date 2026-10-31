@@ -1,14 +1,18 @@
 import json
-from datetime import date
+from datetime import date, datetime, time
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
 
 from confirm_utils import (READ_ONLY_FIELDS, UNIT_OPTIONS, confirm, df_to_records,
                            is_confirmation_current, records_to_df,
                            review_blockers, snapshot)
+import reminders
 from schedule import build_schedule
+
+load_dotenv()
 
 MOCK_PATH = Path("sample_prescriptions/mock_prescription.json")
 
@@ -43,7 +47,8 @@ def load_medicines(records):
     reset_confirmation()
 
 
-tab_upload, tab_confirm, tab_results = st.tabs(["1. Upload", "2. Confirm", "3. Results"])
+tab_upload, tab_confirm, tab_results, tab_rem = st.tabs(
+    ["1. Upload", "2. Confirm", "3. Results", "4. Reminders"])
 
 # ---------- 1. Upload ----------
 with tab_upload:
@@ -109,7 +114,7 @@ with tab_results:
         st.info("Confirm your medicines first.")
     else:
         t1, t2, t3 = st.tabs(["Schedule", "Prices", "Refill"])
-        start = t1.date_input("Course starts on", value=date.today())
+        start = t1.date_input("Course starts on", value=date.today(), key="start_date")
         results = [build_schedule(m, start) for m in confirmed]
 
         with t1:
@@ -142,3 +147,76 @@ with tab_results:
                              f'{r["refill_date"].strftime("%d %b %Y")}')
             else:
                 st.info("No long-term medicines (30 days or more) in this prescription.")
+
+
+# ---------- 4. Reminders ----------
+with tab_rem:
+    confirmed = st.session_state.confirmed_records
+    if not confirmed:
+        st.info("Confirm your medicines first.")
+    else:
+        start = st.session_state.get("start_date", date.today())
+        results = [build_schedule(m, start) for m in confirmed]
+
+        with st.expander("Reminder times (your own settings, not medical advice)"):
+            cols = st.columns(4)
+            slot_times = {slot: cols[i].time_input(slot.capitalize(),
+                                                   value=reminders.DEFAULT_SLOT_TIMES[slot],
+                                                   key=f"time_{slot}")
+                          for i, slot in enumerate(reminders.SLOTS)}
+
+        # Rebuild the dose log when the confirmed prescription, start date or times change.
+        key = (st.session_state.confirmed_snapshot, str(start), str(slot_times))
+        conn = reminders.connect()
+        if st.session_state.get("reminder_key") != key:
+            reminders.load_schedule(conn, results, slot_times)
+            st.session_state.reminder_key = key
+
+        now = datetime.now()
+        for alert in reminders.refill_alerts(results, now.date()):
+            (st.warning if alert["level"] == "warning" else st.info)(alert["message"])
+
+        st.subheader("Today")
+        doses = reminders.todays_doses(conn, now.date())
+        if not doses:
+            st.info("No doses scheduled today. Check the course start date in Results.")
+        for d in doses:
+            due = datetime.fromisoformat(d["due_at"])
+            amount = int(d["amount"]) if float(d["amount"]).is_integer() else d["amount"]
+            label = f'{due.strftime("%I:%M %p")}  |  {d["medicine"]}  |  {amount} {d["unit"]}'
+            c1, c2 = st.columns([4, 1])
+            if d["status"] == "taken":
+                c1.success(f"Taken: {label}")
+            else:
+                late = now > due + pd.Timedelta(minutes=reminders.GRACE_MINUTES)
+                (c1.error if late else c1.write)(label + ("  (overdue)" if late else ""))
+                if c2.button("Taken", key=f"taken_{d['id']}"):
+                    reminders.mark_taken(conn, d["id"], now)
+                    st.rerun()
+
+        st.subheader("Caregiver alerts (Telegram)")
+        sender = reminders.sender_from_env()
+        if sender is None:
+            st.caption("Telegram is not set up. Add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID "
+                       "to your .env file and restart the app.")
+        b1, b2 = st.columns(2)
+        if b1.button("Check for missed doses"):
+            if sender is None:
+                st.warning("Telegram is not set up, so nothing was sent.")
+            else:
+                sent = reminders.send_missed_alerts(conn, now, sender)
+                st.success(f"Sent {len(sent)} alert(s).") if sent else st.info(
+                    "No missed doses to report.")
+        if b2.button("Simulate missed dose (demo)"):
+            msg, ok = reminders.simulate_missed_dose(conn, sender)
+            if msg is None:
+                st.info("No pending doses to simulate.")
+            elif ok:
+                st.success("Demo alert sent to Telegram.")
+                st.code(msg)
+            else:
+                st.warning("Message not sent (Telegram not set up or failed). Preview:")
+                st.code(msg)
+        st.caption("Alerts only say a dose was not marked as taken. "
+                   "Reminder and information tool, not medical advice.")
+        conn.close()
