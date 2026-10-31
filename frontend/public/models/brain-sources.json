@@ -1,0 +1,369 @@
+{
+  "creator": "BodyParts3D / The Database Center for Life Science (DBCLS), Japan",
+  "dataset": "3.0 / 20110915",
+  "license": "CC BY-SA 2.1 Japan",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.1/jp/",
+  "sourceLicenseUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/LICENSE_content",
+  "components": [
+    {
+      "id": "BP49",
+      "name": "left superior parietal lobule precuneus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/BP49.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/8617e20f621087aabb72e496cfb31ddb7e708369",
+      "gitBlob": "8617e20f621087aabb72e496cfb31ddb7e708369",
+      "bytes": 995384
+    },
+    {
+      "id": "BP50",
+      "name": "right superior parietal lobule precuneus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/BP50.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/fee59bcd7e0ec3d4ffa7996b1c49b196bf56bcee",
+      "gitBlob": "fee59bcd7e0ec3d4ffa7996b1c49b196bf56bcee",
+      "bytes": 996384
+    },
+    {
+      "id": "BP51",
+      "name": "orbital gyri straight gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/BP51.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/b77046ec652c8b070083ce5e0aa80973089864a3",
+      "gitBlob": "b77046ec652c8b070083ce5e0aa80973089864a3",
+      "bytes": 1069484
+    },
+    {
+      "id": "FMA72653",
+      "name": "right superior frontal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72653.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/5cead12a6665ae645a7337f3f3cd08965df41f52",
+      "gitBlob": "5cead12a6665ae645a7337f3f3cd08965df41f52",
+      "bytes": 1522484
+    },
+    {
+      "id": "FMA72654",
+      "name": "left superior frontal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72654.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/9fbe3ba0ef668a35e9d1d11392e705ea67ff7676",
+      "gitBlob": "9fbe3ba0ef668a35e9d1d11392e705ea67ff7676",
+      "bytes": 1522584
+    },
+    {
+      "id": "FMA72655",
+      "name": "right middle frontal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72655.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/3c7e9e5342f994c582b6aaf47372cff72cf3d5a8",
+      "gitBlob": "3c7e9e5342f994c582b6aaf47372cff72cf3d5a8",
+      "bytes": 777984
+    },
+    {
+      "id": "FMA72656",
+      "name": "left middle frontal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72656.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/f54254ca996e3f690c01f1bfb756793172fad6ea",
+      "gitBlob": "f54254ca996e3f690c01f1bfb756793172fad6ea",
+      "bytes": 777284
+    },
+    {
+      "id": "FMA72661",
+      "name": "right precentral gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72661.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/ce50e40df1758a2ea71f4330cf69bea5713da4e4",
+      "gitBlob": "ce50e40df1758a2ea71f4330cf69bea5713da4e4",
+      "bytes": 941984
+    },
+    {
+      "id": "FMA72662",
+      "name": "left precentral gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72662.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/0bd34ac51510424d4641481cf231f72d51433c08",
+      "gitBlob": "0bd34ac51510424d4641481cf231f72d51433c08",
+      "bytes": 941884
+    },
+    {
+      "id": "FMA72665",
+      "name": "right postcentral gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72665.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/3ff147e6df8d1176a7c37e2335a842cb7c9d0f90",
+      "gitBlob": "3ff147e6df8d1176a7c37e2335a842cb7c9d0f90",
+      "bytes": 843184
+    },
+    {
+      "id": "FMA72666",
+      "name": "left postcentral gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72666.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/ec06cb7bcafdbb95be1e0bb0824022f67ef14fa2",
+      "gitBlob": "ec06cb7bcafdbb95be1e0bb0824022f67ef14fa2",
+      "bytes": 842984
+    },
+    {
+      "id": "FMA72667",
+      "name": "right supramarginal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72667.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/9e8984ddf032956bf1a6b0fbee4be32c4dc9db48",
+      "gitBlob": "9e8984ddf032956bf1a6b0fbee4be32c4dc9db48",
+      "bytes": 489184
+    },
+    {
+      "id": "FMA72668",
+      "name": "left supramarginal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72668.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/e7bb318a0e1375c0dfeefddf53bbb281a6eaf61c",
+      "gitBlob": "e7bb318a0e1375c0dfeefddf53bbb281a6eaf61c",
+      "bytes": 488984
+    },
+    {
+      "id": "FMA72669",
+      "name": "right angular gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72669.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/3b1eb5cb156f4f05b857caa6df73dcd740ad5ec1",
+      "gitBlob": "3b1eb5cb156f4f05b857caa6df73dcd740ad5ec1",
+      "bytes": 658684
+    },
+    {
+      "id": "FMA72670",
+      "name": "left angular gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72670.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/5ede5f59e8d99824a7a4d2682b8b681e98f757df",
+      "gitBlob": "5ede5f59e8d99824a7a4d2682b8b681e98f757df",
+      "bytes": 658284
+    },
+    {
+      "id": "FMA72685",
+      "name": "right middle temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72685.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/b9b6b9d8f22f2a99d95907b91e61ae9921e60b10",
+      "gitBlob": "b9b6b9d8f22f2a99d95907b91e61ae9921e60b10",
+      "bytes": 646384
+    },
+    {
+      "id": "FMA72686",
+      "name": "left middle temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72686.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/39654cd59bce72ec6764c679a07b8bbb5d900c59",
+      "gitBlob": "39654cd59bce72ec6764c679a07b8bbb5d900c59",
+      "bytes": 645984
+    },
+    {
+      "id": "FMA72687",
+      "name": "right inferior temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72687.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/c45a636e4c72e216f3b0851b5cc2c0f47518e211",
+      "gitBlob": "c45a636e4c72e216f3b0851b5cc2c0f47518e211",
+      "bytes": 652884
+    },
+    {
+      "id": "FMA72688",
+      "name": "left inferior temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72688.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/5c0b14dfa348a19db63527d73cf9fc42ba858552",
+      "gitBlob": "5c0b14dfa348a19db63527d73cf9fc42ba858552",
+      "bytes": 652084
+    },
+    {
+      "id": "FMA72689",
+      "name": "right fusiform gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72689.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/4f1c51df04c005486435b899370e3ef5cc0ded85",
+      "gitBlob": "4f1c51df04c005486435b899370e3ef5cc0ded85",
+      "bytes": 307584
+    },
+    {
+      "id": "FMA72690",
+      "name": "left fusiform gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72690.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/505e9478dea62b6569f98d8745aba0dd39a030db",
+      "gitBlob": "505e9478dea62b6569f98d8745aba0dd39a030db",
+      "bytes": 307484
+    },
+    {
+      "id": "FMA72701",
+      "name": "right accessory short gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72701.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/7de7ecd873d53dcf30e3f7ceae52989aff7e0c65",
+      "gitBlob": "7de7ecd873d53dcf30e3f7ceae52989aff7e0c65",
+      "bytes": 767384
+    },
+    {
+      "id": "FMA72702",
+      "name": "left accessory short gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72702.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/8bbfdc81f2d477b60805cac711ca88877636eef4",
+      "gitBlob": "8bbfdc81f2d477b60805cac711ca88877636eef4",
+      "bytes": 766584
+    },
+    {
+      "id": "FMA72705",
+      "name": "right parahippocampal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72705.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/0dc6087db60c22aca039a26bb19d59776d494296",
+      "gitBlob": "0dc6087db60c22aca039a26bb19d59776d494296",
+      "bytes": 172784
+    },
+    {
+      "id": "FMA72706",
+      "name": "left parahippocampal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72706.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/e021f0864fb3baa94fb156232c8f950ad0a8df3f",
+      "gitBlob": "e021f0864fb3baa94fb156232c8f950ad0a8df3f",
+      "bytes": 172684
+    },
+    {
+      "id": "FMA72713",
+      "name": "right hippocampus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72713.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/0357c2a4177661790370dd04c8c7a6c3b11df72a",
+      "gitBlob": "0357c2a4177661790370dd04c8c7a6c3b11df72a",
+      "bytes": 222684
+    },
+    {
+      "id": "FMA72714",
+      "name": "left hippocampus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72714.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/464340797df8bc006c049569172ffe7a7e1ffd92",
+      "gitBlob": "464340797df8bc006c049569172ffe7a7e1ffd92",
+      "bytes": 214084
+    },
+    {
+      "id": "FMA72717",
+      "name": "right cingulate gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72717.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/d204676804727edc685d249138590fd204fb6c42",
+      "gitBlob": "d204676804727edc685d249138590fd204fb6c42",
+      "bytes": 585884
+    },
+    {
+      "id": "FMA72718",
+      "name": "left cingulate gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72718.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/d3c46619e13f1125b61854d4ab76752a3794afdd",
+      "gitBlob": "d3c46619e13f1125b61854d4ab76752a3794afdd",
+      "bytes": 586284
+    },
+    {
+      "id": "FMA72800",
+      "name": "anterior part of right superior temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72800.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/3fddf2cbe22f553e849d894e30025df5f6d8a0d1",
+      "gitBlob": "3fddf2cbe22f553e849d894e30025df5f6d8a0d1",
+      "bytes": 417484
+    },
+    {
+      "id": "FMA72801",
+      "name": "anterior part of left superior temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72801.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/68930f7aac7506d432287f971ff2c232fd9dc4d3",
+      "gitBlob": "68930f7aac7506d432287f971ff2c232fd9dc4d3",
+      "bytes": 416984
+    },
+    {
+      "id": "FMA72804",
+      "name": "posterior part of right superior temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72804.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/a714e2c60ea7aa1847763ef6bbd692a64bd465e8",
+      "gitBlob": "a714e2c60ea7aa1847763ef6bbd692a64bd465e8",
+      "bytes": 523684
+    },
+    {
+      "id": "FMA72805",
+      "name": "posterior part of left superior temporal gyrus",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72805.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/8e2607857cec2425a80a8c2bfb77ce871846fa99",
+      "gitBlob": "8e2607857cec2425a80a8c2bfb77ce871846fa99",
+      "bytes": 523684
+    },
+    {
+      "id": "FMA72975",
+      "name": "right occipital lobe",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72975.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/cde4e714282d35fd8649ebfba4e364bf6800a4f0",
+      "gitBlob": "cde4e714282d35fd8649ebfba4e364bf6800a4f0",
+      "bytes": 938184
+    },
+    {
+      "id": "FMA72976",
+      "name": "left occipital lobe",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72976.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/78ad274e7c9e3a3203569b288625a93fa1f26592",
+      "gitBlob": "78ad274e7c9e3a3203569b288625a93fa1f26592",
+      "bytes": 937384
+    },
+    {
+      "id": "FMA72977",
+      "name": "right insula",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72977.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/05f474a9ff0ad66023babc1a4f89c6638f2b780d",
+      "gitBlob": "05f474a9ff0ad66023babc1a4f89c6638f2b780d",
+      "bytes": 612084
+    },
+    {
+      "id": "FMA72978",
+      "name": "left insula",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA72978.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/19213e2e96339279a64254a731fa52078f9c1f55",
+      "gitBlob": "19213e2e96339279a64254a731fa52078f9c1f55",
+      "bytes": 612184
+    }
+  ],
+  "alignmentReferences": [
+    {
+      "id": "FMA7148",
+      "name": "stomach",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA7148.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/5664b6c743db7b2534e08aa751aceb6ef6f1152d",
+      "gitBlob": "5664b6c743db7b2534e08aa751aceb6ef6f1152d",
+      "bytes": 469284
+    },
+    {
+      "id": "FMA7204",
+      "name": "right kidney",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA7204.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/325beb4f4ece92e8e65a85376cd2e68edd468bcd",
+      "gitBlob": "325beb4f4ece92e8e65a85376cd2e68edd468bcd",
+      "bytes": 619784
+    },
+    {
+      "id": "FMA67943",
+      "name": "pons",
+      "sourceUrl": "https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/blob/main/assets/BodyParts3D_data/stl/FMA67943.stl",
+      "blobUrl": "https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/blobs/b63d5f0971c7156293589a1e21d754af874d24a9",
+      "gitBlob": "b63d5f0971c7156293589a1e21d754af874d24a9",
+      "bytes": 4503684
+    }
+  ],
+  "conversion": {
+    "matrixColumnMajor": [
+      0.004056572616984543,
+      0,
+      0,
+      0,
+      0,
+      0,
+      -0.004056572616984543,
+      0,
+      0,
+      0.004056572616984543,
+      0,
+      0,
+      -0.000010678159700474418,
+      -3.4771711514440717,
+      0.00026827547102979227,
+      1
+    ],
+    "maxReferenceBoundsResidual": 0.0006373777850630091,
+    "sourceTriangles": 504122,
+    "outputTriangles": 277680,
+    "outputBytes": 896848,
+    "outputSha256": "56b169c7774af3abb31da1b68ef766ddef0ba7f512d7c46989eaa48d5c623dad",
+    "cortexBounds": {
+      "min": [
+        -0.2736232578754425,
+        2.698270797729492,
+        0.018323633819818497
+      ],
+      "max": [
+        0.26825249195098877,
+        3.147536277770996,
+        0.7088785171508789
+      ]
+    },
+    "changes": "Axis conversion, uniform scale and translation recovered from matching stomach, kidney and pons bounds; vertex welding, smoothed normals, bounded mesh simplification and Draco compression. Original gyri geometry, no procedural brain."
+  }
+}

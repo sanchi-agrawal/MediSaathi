@@ -1,9 +1,11 @@
+import { useLanguage } from '../lib/language'
 import { Activity, ArrowUpRight, CircleHelp, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
 
 export function Brand({ compact = false }: { compact?: boolean }) {
-  return <Link className="brand" to="/" aria-label="MediSaathi home"><span className="brand-icon"><Activity size={23} strokeWidth={2.5} /></span>{!compact && <span>Medi<span className="text-coral">Saathi</span><small>YOUR HEALTH COMPANION</small></span>}</Link>
+  const { t } = useLanguage()
+  return <Link className="brand" to="/" aria-label={t("MediSaathi home")}><span className="brand-icon"><Activity size={23} strokeWidth={2.5} /></span>{!compact && <span>Medi<span className="text-coral">Saathi</span><small>{t("YOUR HEALTH COMPANION")}</small></span>}</Link>
 }
 export function Badge({ children, tone = 'blue' }: { children: ReactNode; tone?: 'blue' | 'coral' | 'green' | 'muted' }) {
   return <span className={`badge badge-${tone}`}>{children}</span>

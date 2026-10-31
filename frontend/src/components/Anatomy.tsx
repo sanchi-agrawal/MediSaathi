@@ -1,32 +1,268 @@
-import { useState } from 'react'
-import { Heart, Info, RotateCcw } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import * as T from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { MousePointer2, RotateCcw } from 'lucide-react'
+import { useLanguage } from '../lib/language'
+import { AnatomyFallback } from './AnatomyFallback'
+import { fitCamera, measureUpperBody, organMaterial, restingPose, rotationLimits, shellMaterial, updateSelection, updateShellSelection } from './anatomyAppearance'
 
-const organs = {
-  heart: { label: 'Heart', detail: 'Part of the circulatory system.', x: 54, y: 35 },
-  lungs: { label: 'Lungs', detail: 'Part of the respiratory system.', x: 38, y: 31 },
-  brain: { label: 'Brain', detail: 'Part of the nervous system.', x: 50, y: 10 },
+export const organs = [
+  ['Brain', 'Coordinates thought, movement and many body functions.'],
+  ['Heart', 'Pumps blood throughout the body.'],
+  ['Lungs', 'Exchange oxygen and carbon dioxide during breathing.'],
+  ['Liver', 'Processes nutrients and helps remove substances from blood.'],
+  ['Stomach', 'Mixes food with acid and enzymes for digestion.'],
+  ['Kidneys', 'Filter blood and regulate water and salts.'],
+  ['Intestines', 'Absorb nutrients and water and move digestive waste.'],
+] as const
+
+function disposeTree(root: T.Object3D) {
+  const geometries = new Set<T.BufferGeometry>(), materials = new Set<T.Material>()
+  root.traverse(object => {
+    if (object instanceof T.Mesh) {
+      geometries.add(object.geometry)
+      const list = Array.isArray(object.material) ? object.material : [object.material]
+      list.forEach(material => materials.add(material))
+    }
+  })
+  geometries.forEach(geometry => geometry.dispose())
+  materials.forEach(material => material.dispose())
 }
+
 export default function Anatomy() {
-  const [selected, setSelected] = useState<keyof typeof organs>('heart')
-  const [angle, setAngle] = useState(0)
-  return <div className="anatomy-scene">
-    <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-    <span className="anatomy-label">THE HUMAN CONNECTION</span>
-    <div className="anatomy-body" style={{ transform: `perspective(900px) rotateY(${angle}deg)` }}>
-      <svg viewBox="0 0 300 600" role="img" aria-label="Stylized human anatomy illustration, not a clinical model">
-        <defs><linearGradient id="body" x1="0" x2="1"><stop stopColor="#163e5d" stopOpacity=".35"/><stop offset=".5" stopColor="#7cc7ec" stopOpacity=".2"/><stop offset="1" stopColor="#19507b" stopOpacity=".4"/></linearGradient><radialGradient id="organ"><stop stopColor="#ff8b94"/><stop offset="1" stopColor="#ff5967" stopOpacity=".4"/></radialGradient><filter id="soft"><feGaussianBlur stdDeviation="4"/></filter></defs>
-        <path d="M150 22 C117 22 113 45 116 65 Q117 89 132 98 L131 117 Q104 122 87 133 Q74 142 69 169 L54 241 L38 307 Q32 326 41 330 Q49 332 56 312 L83 249 L104 187 L108 259 Q97 297 104 341 L113 442 L111 548 Q96 564 102 572 L129 572 Q138 568 136 549 L141 443 L150 353 L159 443 L164 549 Q162 568 171 572 L198 572 Q204 564 189 548 L187 442 L196 341 Q203 297 192 259 L196 187 L217 249 L244 312 Q251 332 259 330 Q268 326 262 307 L246 241 L231 169 Q226 142 213 133 Q196 122 169 117 L168 98 Q183 89 184 65 C187 45 183 22 150 22Z" fill="url(#body)" stroke="#6db4d5" strokeWidth="1.3"/>
-        <g fill="none" stroke="#79b1ca" opacity=".35"><path d="M150 115 V335 M114 151 Q150 168 186 151 M112 164 Q150 185 188 164 M110 180 Q150 202 190 180 M110 196 Q150 219 190 196 M112 212 Q150 234 188 212 M115 228 Q150 249 185 228 M114 290 Q150 316 186 290 M113 309 Q150 338 187 309 M124 342 L128 440 L123 548 M176 342 L172 440 L177 548 M97 159 L75 241 L45 316 M203 159 L225 241 L255 316"/>{Array.from({length:15},(_,i)=><path key={i} d={`M145 ${130+i*12} h10`} />)}</g>
-        <path d="M140 146 Q118 134 112 163 Q101 191 112 223 Q127 237 139 217Z M160 146 Q182 134 188 163 Q199 191 188 223 Q173 237 161 217Z" fill="#278dda" opacity={selected === 'lungs' ? '.85' : '.3'} stroke="#58b4ec"/>
-        <path d="M151 185 C134 169 123 194 139 211 L153 227 L168 207 C180 187 164 173 151 185Z" fill="url(#organ)" opacity={selected === 'heart' ? '1' : '.5'}/>
-        <path d="M125 50 Q124 30 148 32 Q175 29 176 52 L170 72 Q149 82 130 69Z" fill="#278dda" opacity={selected === 'brain' ? '.8' : '.35'} stroke="#77bbdf"/>
-        <path d="M123 252 Q147 238 177 250 Q181 272 160 277 Q146 291 120 279Z" fill="#ff8b94" opacity=".25"/>
-        <g stroke="#73bddc" fill="none" opacity=".35"><path d="M124 53 Q142 38 151 60 Q158 40 171 52 M130 61 Q148 48 168 65 M120 268 Q155 256 176 266 M120 277 Q148 269 168 278"/></g>
-      </svg>
-      {Object.entries(organs).map(([key, organ]) => <button key={key} className={`organ-dot ${selected === key ? 'selected' : ''}`} style={{left:`${organ.x}%`,top:`${organ.y}%`}} onClick={() => setSelected(key as keyof typeof organs)} aria-label={`Explore ${organ.label}`} aria-pressed={selected === key} />)}
+  const { t } = useLanguage()
+  const host = useRef<HTMLDivElement>(null), selection = useRef(1), reset = useRef(() => {})
+  const [selected, setSelected] = useState(1), [failed, setFailed] = useState(false)
+  const [loading, setLoading] = useState(true), [available, setAvailable] = useState<number[]>([])
+  const [shellMissing, setShellMissing] = useState(false)
+  const [brainMissing, setBrainMissing] = useState(false)
+  selection.current = selected
+
+  useEffect(() => {
+    const element = host.current!
+    let renderer: T.WebGLRenderer
+    try { renderer = new T.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' }) }
+    catch { setFailed(true); setLoading(false); return }
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))
+    renderer.outputColorSpace = T.SRGBColorSpace
+    renderer.toneMapping = T.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.05
+    element.appendChild(renderer.domElement)
+
+    const scene = new T.Scene(), body = new T.Group(), content = new T.Group()
+    const camera = new T.PerspectiveCamera(34, 1, .1, 60), meshes: T.Mesh[] = [], shells: T.Mesh[] = []
+    const brainParts: T.Mesh[] = [], cortex: T.Mesh[] = []
+    body.add(content); scene.add(body)
+    body.rotation.set(restingPose.pitch, restingPose.yaw, 0)
+    scene.add(new T.HemisphereLight('#b9cbdc', '#283043', .55))
+    const key = new T.DirectionalLight('#fff1e7', 2.6); key.position.set(-3, 4, 6)
+    const rim = new T.DirectionalLight('#64d5ed', 1.7); rim.position.set(3, 2, -4)
+    const fill = new T.DirectionalLight('#b3c9dd', .65); fill.position.set(4, 0, 4)
+    scene.add(key, rim, fill)
+
+    // Small, generated studio reflection map: no HDR download or postprocessing.
+    let environment: T.WebGLRenderTarget | undefined
+    const studio = new RoomEnvironment(), pmrem = new T.PMREMGenerator(renderer)
+    try { environment = pmrem.fromScene(studio, .04, .1, 30, { size: 128 }); scene.environment = environment.texture }
+    catch { /* Direct key/rim/fill remain usable if the environment cannot be allocated. */ }
+    finally { studio.dispose(); pmrem.dispose() }
+
+    let disposed = false, x = restingPose.pitch, y = restingPose.yaw, hover = -1, frame = 0
+    let framingBounds: T.Box3 | null = null
+    let viewportWidth = 0, viewportHeight = 0
+    let visible = true, dragging = false, pointerId: number | null = null, moved = false
+    let lastX = 0, lastY = 0, startX = 0, startY = 0
+    const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    const raycaster = new T.Raycaster(), pointer = new T.Vector2()
+
+    function draw() {
+      frame = 0
+      if (disposed || !visible || document.hidden) return
+      const damping = motion.matches ? 1 : .12
+      body.rotation.x += (x - body.rotation.x) * damping
+      body.rotation.y += (y - body.rotation.y) * damping
+      if (framingBounds && viewportWidth && viewportHeight) fitCamera(camera, viewportWidth, viewportHeight, framingBounds, { pitch: body.rotation.x, yaw: body.rotation.y })
+      updateSelection(meshes, selection.current, hover)
+      updateShellSelection(shells, selection.current, hover)
+      renderer.render(scene, camera)
+      if (Math.abs(x - body.rotation.x) + Math.abs(y - body.rotation.y) > .001) wake()
+    }
+    function wake() { if (!frame && !disposed && visible && !document.hidden) frame = requestAnimationFrame(draw) }
+    function pick(event: PointerEvent, commit = false) {
+      const rect = element.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1)
+      // Keep raycasting correct even if a pointer event arrives before the next frame.
+      scene.updateMatrixWorld(true); camera.updateMatrixWorld(true)
+      raycaster.setFromCamera(pointer, camera)
+      const hit = raycaster.intersectObjects(meshes, false)[0]
+      hover = hit?.object.userData.organ ?? -1
+      if (hit && commit) setSelected(hit.object.userData.organ)
+      element.style.cursor = dragging ? 'grabbing' : hit ? 'pointer' : 'grab'
+    }
+    function move(event: PointerEvent) {
+      if (dragging) {
+        if (event.pointerId !== pointerId) return
+        moved ||= Math.hypot(event.clientX - startX, event.clientY - startY) > 5
+        y += (event.clientX - lastX) * .008; x += (event.clientY - lastY) * .004
+        lastX = event.clientX; lastY = event.clientY
+      } else if (event.pointerType === 'mouse') {
+        pick(event)
+        if (!motion.matches) {
+          const rect = element.getBoundingClientRect()
+          if (rect.width && rect.height) {
+            y = restingPose.yaw + ((event.clientX - rect.left) / rect.width - .5) * .6
+            x = restingPose.pitch + ((event.clientY - rect.top) / rect.height - .5) * .18
+          }
+        }
+      }
+      x = T.MathUtils.clamp(x, ...rotationLimits.pitch); y = T.MathUtils.clamp(y, ...rotationLimits.yaw)
+      wake()
+    }
+    function down(event: PointerEvent) {
+      if (dragging || (event.pointerType === 'mouse' && event.button !== 0)) return
+      dragging = true; moved = false; pointerId = event.pointerId
+      startX = lastX = event.clientX; startY = lastY = event.clientY
+      element.setPointerCapture(event.pointerId); element.style.cursor = 'grabbing'
+    }
+    function rest() { hover = -1; x = restingPose.pitch; y = restingPose.yaw; wake() }
+    function up(event: PointerEvent) {
+      if (event.pointerId !== pointerId) return
+      if (!moved) pick(event, true)
+      dragging = false; pointerId = null
+      if (element.hasPointerCapture(event.pointerId)) element.releasePointerCapture(event.pointerId)
+      element.style.cursor = 'grab'
+      const rect = element.getBoundingClientRect()
+      if (event.pointerType === 'touch' || event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) rest()
+      wake()
+    }
+    function leave() { if (!dragging) rest() }
+    function cancel() { dragging = false; pointerId = null; rest() }
+    function lostCapture() { if (dragging) cancel() }
+    function resize() {
+      const rect = element.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      viewportWidth = rect.width; viewportHeight = rect.height
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5, Math.sqrt(1_600_000 / (rect.width * rect.height))))
+      renderer.setSize(rect.width, rect.height)
+      if (framingBounds) fitCamera(camera, rect.width, rect.height, framingBounds, { pitch: body.rotation.x, yaw: body.rotation.y })
+      wake()
+    }
+    function lost(event: Event) { event.preventDefault(); setFailed(true); cancelAnimationFrame(frame); frame = 0 }
+    function pageVisibility() { if (document.hidden) { cancelAnimationFrame(frame); frame = 0 } else wake() }
+
+    const decoder = new DRACOLoader().setDecoderPath('/draco/').setDecoderConfig({ type: 'wasm' })
+    const loader = new GLTFLoader().setDRACOLoader(decoder)
+    const organLoad = loader.loadAsync('/models/anatomy-organs.glb').then(gltf => {
+      if (disposed) { disposeTree(gltf.scene); return }
+      gltf.scene.traverse(object => {
+        if (!(object instanceof T.Mesh)) return
+        const id = organs.findIndex(([name]) => object.name.startsWith(name.toLowerCase() + '__FMA'))
+        if (id < 0) { object.visible = false; return }
+        object.userData.organ = id
+        const previous = Array.isArray(object.material) ? object.material : [object.material]
+        previous.forEach(material => material.dispose())
+        object.material = organMaterial(id)
+        // Reuse the supplied cerebellum and brainstem, but only expose Brain
+        // after the corresponding real cerebral cortex also loads.
+        if (id === 0) { object.visible = false; brainParts.push(object) }
+        else meshes.push(object)
+      })
+      if (!meshes.length) { disposeTree(gltf.scene); throw new Error('No supported organ geometry') }
+      content.add(gltf.scene)
+      wake()
+    })
+    const brainLoad = loader.loadAsync('/models/anatomy-cerebrum.glb').then(gltf => {
+      if (disposed) { disposeTree(gltf.scene); return }
+      gltf.scene.traverse(object => {
+        if (!(object instanceof T.Mesh)) return
+        if (object.name !== 'brain__FMA61830') { object.visible = false; return }
+        const previous = Array.isArray(object.material) ? object.material : [object.material]
+        previous.forEach(material => material.dispose())
+        object.material = organMaterial(0); object.userData.organ = 0
+        object.visible = false; cortex.push(object)
+      })
+      if (!cortex.length) { disposeTree(gltf.scene); throw new Error('Verified cerebral cortex missing') }
+      // Registration is baked into the imported GLB and recorded in its source
+      // manifest. No independent runtime brain scaling/positioning is applied.
+      content.add(gltf.scene)
+    }).catch(() => { if (!disposed) setBrainMissing(true) })
+    const shellLoad = loader.loadAsync('/models/anatomy-skin.glb').then(gltf => {
+      if (disposed) { disposeTree(gltf.scene); return }
+      gltf.scene.traverse(object => {
+        if (!(object instanceof T.Mesh)) return
+        if (object.name !== 'skin__FMA7163') { object.visible = false; return }
+        const previous = Array.isArray(object.material) ? object.material : [object.material]
+        previous.forEach(material => material.dispose())
+        object.material = shellMaterial()
+        // Opaque organs write depth first; the transparent shell then uses
+        // Three.js's normal depth-tested sorting instead of an overlay order.
+        object.renderOrder = 0; object.visible = true; shells.push(object)
+      })
+      if (!shells.length) { disposeTree(gltf.scene); throw new Error('Matching skin mesh missing') }
+      content.add(gltf.scene); wake()
+    }).catch(() => { if (!disposed) setShellMissing(true) })
+    Promise.allSettled([organLoad, shellLoad, brainLoad]).then(([organsResult]) => {
+      decoder.dispose()
+      if (disposed) return
+      if (organsResult.status === 'rejected') { setFailed(true); setAvailable([]) }
+      else {
+        if (cortex.length) {
+          for (const part of [...cortex, ...brainParts]) { part.visible = true; meshes.push(part) }
+        }
+        setAvailable([...new Set(meshes.map(mesh => mesh.userData.organ as number))])
+      }
+      const sourceBounds = measureUpperBody(content, meshes, shells)
+      if (sourceBounds) {
+        // Translate both roots together; never stretch or reposition anatomy.
+        content.position.copy(sourceBounds.getCenter(new T.Vector3())).negate()
+        framingBounds = sourceBounds.clone().translate(content.position)
+      }
+      setLoading(false); resize(); wake()
+    })
+
+    const observer = new IntersectionObserver(entries => {
+      visible = entries[0].isIntersecting
+      if (visible) wake(); else { cancelAnimationFrame(frame); frame = 0 }
+    })
+    observer.observe(element)
+    const sizes = new ResizeObserver(resize); sizes.observe(element)
+    const handlers = { pointermove: move, pointerdown: down, pointerup: up, pointerleave: leave, pointercancel: cancel, lostpointercapture: lostCapture }
+    Object.entries(handlers).forEach(([name, fn]) => element.addEventListener(name, fn as EventListener))
+    element.addEventListener('organ-change', wake)
+    motion.addEventListener('change', rest)
+    document.addEventListener('visibilitychange', pageVisibility)
+    renderer.domElement.addEventListener('webglcontextlost', lost)
+    reset.current = rest
+    resize()
+
+    return () => {
+      disposed = true; cancelAnimationFrame(frame); decoder.dispose(); observer.disconnect(); sizes.disconnect()
+      Object.entries(handlers).forEach(([name, fn]) => element.removeEventListener(name, fn as EventListener))
+      element.removeEventListener('organ-change', wake); motion.removeEventListener('change', rest)
+      document.removeEventListener('visibilitychange', pageVisibility); renderer.domElement.removeEventListener('webglcontextlost', lost)
+      disposeTree(body); environment?.dispose(); renderer.dispose(); renderer.domElement.remove()
+    }
+  }, [])
+
+  useEffect(() => { host.current?.dispatchEvent(new Event('organ-change')) }, [selected])
+  return <div className="anatomy-explorer" aria-busy={loading} data-shell-state={loading ? 'loading' : failed ? 'unavailable' : shellMissing ? 'missing' : 'loaded'} data-brain-state={loading ? 'loading' : failed ? 'unavailable' : brainMissing ? 'missing' : 'loaded'}>
+    <div className="anatomy-stage">
+    <div ref={host} className="anatomy-viewport" role="img" aria-label={t('Anatomical organ model')} aria-describedby="anatomy-help" hidden={failed}/>
+    {(failed || loading) && <AnatomyFallback loading={!failed}/>}
+    {!loading && !failed && <div className="organ-card" aria-live="polite"><span className="organ-eyebrow">{t('Explore your anatomy')}</span><h2 className="organ-name">{t(organs[selected][0])}</h2><p>{t(organs[selected][1])}</p></div>}
     </div>
-    <div className="anatomy-info"><span className="icon-box coral"><Heart size={21}/></span><div><span className="micro">EXPLORE YOUR ANATOMY</span><strong>{organs[selected].label}</strong><p>{organs[selected].detail}</p></div></div>
-    <div className="anatomy-controls"><label htmlFor="body-angle">Rotate view</label><input id="body-angle" type="range" min="-35" max="35" value={angle} onChange={e => setAngle(Number(e.target.value))}/><button className="icon-button" aria-label="Reset anatomy rotation" onClick={() => setAngle(0)}><RotateCcw size={15}/></button></div>
-    <span className="anatomy-caption"><Info size={12}/> Stylized illustration · Educational only</span>
+    {!loading && shellMissing && !failed && <p className="shell-notice" role="status">{t('Body outline unavailable. Showing original organs.')}</p>}
+    {!loading && brainMissing && !failed && <p className="shell-notice" role="status">{t('Brain unavailable. Other organs remain available.')}</p>}
+    <section className="anatomy-controls-panel" aria-label={t('Anatomy controls')}>
+      <div className="organ-list" role="group" aria-label={t('Select an organ')}>{!loading && !failed && organs.map(([name], i) => available.includes(i) && <button key={name} aria-pressed={selected === i} onClick={() => setSelected(i)}>{t(name)}</button>)}</div>
+      <div className="rotation-help"><span className="rotation-instruction" id="anatomy-help"><MousePointer2 size={19} aria-hidden="true"/>{t('Move your pointer to rotate. Drag to explore.')}</span><button onClick={() => reset.current()}><RotateCcw size={17} aria-hidden="true"/>{t('Reset view')}</button></div>
+    </section>
+    <div className="anatomy-footnote">
+    <a className="model-credit" href="/models/ATTRIBUTION.txt">BodyParts3D / DBCLS / CC BY-SA 2.1 JP</a>
+    <p className="education-note">{t('Educational model — not a diagnosis.')}</p>
+    </div>
   </div>
 }

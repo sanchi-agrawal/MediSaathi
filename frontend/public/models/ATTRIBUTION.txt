@@ -1,0 +1,51 @@
+BodyParts3D, (c) The Database Center for Life Science licensed under
+CC Attribution-Share Alike 2.1 Japan.
+https://creativecommons.org/licenses/by-sa/2.1/jp/
+https://creativecommons.org/licenses/by-sa/2.1/jp/legalcode
+
+Original data: BodyParts3D 3.0 (20110915), DBCLS, Japan.
+https://doi.org/10.18908/lsdba.nbdc00837-000
+https://lifesciencedb.jp/bp3d/info_en/license/index.html
+Mitsuhashi et al. BodyParts3D: 3D structure database for anatomical concepts.
+https://doi.org/10.1093/nar/gkn613
+
+Source geometry mirror and license:
+https://github.com/Kevin-Mattheus-Moerman/BodyParts3D
+GLB conversion and named organ grouping: yamz8/human-body-simulator contributors.
+https://github.com/yamz8/human-body-simulator/blob/main/public/models/anatomy-organs.glb
+https://github.com/yamz8/human-body-simulator/blob/main/public/models/anatomy-skin.glb
+https://github.com/yamz8/human-body-simulator#bodyparts3d-skin-and-organ-assets
+
+The original organ and skin GLBs are redistributed unmodified under CC BY-SA
+2.1 Japan. Runtime
+adaptations by MediSaathi: PBR material colors, shared upper-body framing,
+selection highlights/dimming, double-sided cyan translucent skin with standard
+depth-tested rendering, and reuse of the existing cerebellum/brainstem with
+the added licensed cerebral cortex.
+These adapted model representations are also offered under CC BY-SA 2.1 Japan.
+This notice does not relicense unrelated application code.
+
+Brain, lungs, heart, liver, stomach, kidneys and intestines are interactive
+when their assets load. The original organ GLB supplies the cerebellum, pons
+and medulla. Those original parts are reused with the added real cortex.
+
+anatomy-cerebrum.glb is an adaptation of 37 original BodyParts3D 3.0 cortical
+STL components (bilateral gyri, parietal/occipital regions, insula and medial
+cortical parts) from:
+https://github.com/Kevin-Mattheus-Moerman/BodyParts3D/tree/main/assets/BodyParts3D_data/stl
+Source creator: The Database Center for Life Science (DBCLS), Japan.
+Source license: CC BY-SA 2.1 Japan; the adapted GLB uses the same license.
+Exact per-component source URLs, pinned blob hashes, names and the recovered
+coordinate matrix are in brain-sources.json alongside this notice.
+Changes by MediSaathi: one common axis conversion/uniform scale/translation
+registered to matching stomach, kidney and pons; welded vertices, smoothed
+normals, bounded simplification, merged draw call and Draco compression.
+The cortex is original anatomical geometry, not a procedural approximation.
+Rebuild: python scripts/fetch-brain-sources.py then node scripts/build-brain.mjs
+
+The outer skin is the matching BodyParts3D skin__FMA7163 mesh in its source
+coordinate system. No body geometry or major vessel layer was fabricated.
+
+Decoder: Google Draco, Apache License 2.0.
+https://github.com/google/draco
+Three.js GLTFLoader/DRACOLoader: MIT.
