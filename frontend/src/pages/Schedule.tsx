@@ -7,6 +7,7 @@ import { schedulingClient,SLOTS,validPlan } from '../lib/scheduling'
 import type { ScheduleContext,SchedulePlan,SchedulingClient,Slot } from '../lib/scheduling'
 import { subscribeSchedulingInvalidation } from '../lib/workflowEvents'
 import '../schedule.css'
+import ReminderPreview from '../components/ReminderPreview'
 
 const blank=()=>({quantity:'',unit:'',days:'',start:'',slots:{morning:false,noon:false,night:false,bedtime:false}})
 type Draft=ReturnType<typeof blank>
@@ -76,6 +77,7 @@ export default function Schedule({client=schedulingClient}:{client?:SchedulingCl
     {data.status==='needs_input'&&<div className="notice" role="alert">Requires clarification: {data.result?.payload.reason} No calculated schedule is available.</div>}
     {data.error&&<div className="error-message" role="alert">{data.error.category}: {data.error.message}</div>}
     {result&&<section className="panel schedule-panel" aria-label="Calculated schedule"><div className="panel-topline"><h2><CalendarDays size={20}/> Calculated schedule · {result.name}</h2><Badge tone="green">Server calculated</Badge></div><dl className="schedule-facts">{SLOTS.map(s=><div key={s}><dt>{s}</dt><dd>{result.doses_by_slot[s]} {result.unit}</dd></div>)}<div><dt>Per day</dt><dd>{result.units_per_day} {result.unit}</dd></div><div><dt>Course total</dt><dd>{result.total_units} {result.unit}</dd></div><div><dt>Start date</dt><dd>{result.start_date}</dd></div><div><dt>End date</dt><dd>{result.end_date}</dd></div><div><dt>Refill planning date</dt><dd>{result.refill_date??'Not calculated for this course'}</dd></div></dl><p>Refill dates use the existing engine’s rule for courses of at least 30 days, three days before the course end. This is not inventory tracking or notification delivery. Edits remove this result and require review and approval again.</p></section>}
+    {result&&<ReminderPreview key={data.analysis_id+data.scheduling_revision+(data.association?.association_id??'')} schedule={data}/>}
     </>}
   </>
 }

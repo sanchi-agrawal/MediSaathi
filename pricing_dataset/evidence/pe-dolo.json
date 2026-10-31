@@ -1,0 +1,30 @@
+{
+  "source_url": "https://pharmeasy.in/online-medicine-order/dolo-650mg-tab-15-s-44140",
+  "collected_date": "2026-10-30",
+  "method": "Public page opened via web tool; normalized factual transcription, not raw HTML or a search snippet",
+  "observed_city": "",
+  "facts": [
+    {
+      "observation_id": "MP009",
+      "item_id": "MED001",
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/online-medicine-order/dolo-650mg-tab-15-s-44140",
+      "source_kind": "public_page",
+      "collected_date": "2026-10-30",
+      "requested_city": "Delhi",
+      "observed_city": "",
+      "location_status": "unconfirmed",
+      "currency": "INR",
+      "pack_size": "15 tablets",
+      "display_price_inr": "23.56",
+      "mrp_inr": "32.28",
+      "price_type": "conditional_offer",
+      "conditions": "Offer applicable on order above INR 1000",
+      "availability": "not_verified",
+      "panel_count": "",
+      "comparability": "exact_listing",
+      "evidence_file": "evidence/pe-dolo.json",
+      "notes": "Pincode not selected; not a verified Delhi quote."
+    }
+  ]
+}

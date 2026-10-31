@@ -1,0 +1,745 @@
+{
+  "schema_version": "15B.1",
+  "historical": true,
+  "items": [
+    {
+      "kind": "medicine",
+      "item_id": "MED001",
+      "name": "Dolo 650 Tablet",
+      "pack_size": "15 tablets"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED002",
+      "name": "Dolo 500 Tablet",
+      "pack_size": "15 tablets"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED003",
+      "name": "Dolo 250 Oral Suspension",
+      "pack_size": "60 ml"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED004",
+      "name": "Dolo 1000mg Tablet",
+      "pack_size": "10 tablets"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED005",
+      "name": "Dolo Drops",
+      "pack_size": "15 ml"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED006",
+      "name": "Dolo 120 Suspension",
+      "pack_size": "60 ml"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED007",
+      "name": "Dolo 156.25mg Suspension",
+      "pack_size": "60 ml"
+    },
+    {
+      "kind": "medicine",
+      "item_id": "MED008",
+      "name": "Dolo 1000mg Infusion",
+      "pack_size": "100 ml"
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB001",
+      "name": "Renal / Kidney Function Test (RFT / KFT)",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB002",
+      "name": "Fasting Blood Sugar (FBS) Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB003",
+      "name": "Liver Function Test (LFT)",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB004",
+      "name": "Erythrocyte Sedimentation Rate (ESR) Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB005",
+      "name": "Serum Electrolytes Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB006",
+      "name": "Lipid Profile Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB007",
+      "name": "Platelet Count Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB008",
+      "name": "Free Thyroid Profile Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB009",
+      "name": "CBC Test",
+      "pack_size": null
+    },
+    {
+      "kind": "lab",
+      "item_id": "LAB010",
+      "name": "Urine Routine Test",
+      "pack_size": null
+    }
+  ],
+  "observations": [
+    {
+      "observation_id": "MP001",
+      "kind": "medicine",
+      "item_id": "MED001",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "15 tablets",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "tablet",
+        "pack_quantity": "15",
+        "pack_unit": "tablet"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP002",
+      "kind": "medicine",
+      "item_id": "MED002",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "15 tablets",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "tablet",
+        "pack_quantity": "15",
+        "pack_unit": "tablet"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP003",
+      "kind": "medicine",
+      "item_id": "MED003",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "concentration_denominator_not_captured",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "60 ml",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "suspension",
+        "pack_quantity": "60",
+        "pack_unit": "ml"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP004",
+      "kind": "medicine",
+      "item_id": "MED004",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "10 tablets",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": "1000 mg",
+        "dosage_form": "tablet",
+        "pack_quantity": "10",
+        "pack_unit": "tablet"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP005",
+      "kind": "medicine",
+      "item_id": "MED005",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "15 ml",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "oral drops",
+        "pack_quantity": "15",
+        "pack_unit": "ml"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP006",
+      "kind": "medicine",
+      "item_id": "MED006",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "concentration_denominator_not_captured",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "60 ml",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "suspension",
+        "pack_quantity": "60",
+        "pack_unit": "ml"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP007",
+      "kind": "medicine",
+      "item_id": "MED007",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "concentration_denominator_not_captured",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "60 ml",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "suspension",
+        "pack_quantity": "60",
+        "pack_unit": "ml"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP008",
+      "kind": "medicine",
+      "item_id": "MED008",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured"
+      ],
+      "platform": "tata_1mg",
+      "source_url": "https://www.1mg.com/categories/featured/top-brands/dolo-1716",
+      "city": "Gurgaon",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "100 ml",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": "1000 mg",
+        "dosage_form": "infusion",
+        "pack_quantity": "100",
+        "pack_unit": "ml"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/1mg-list.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "MP009",
+      "kind": "medicine",
+      "item_id": "MED001",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/online-medicine-order/dolo-650mg-tab-15-s-44140",
+      "city": null,
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "15 tablets",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "tablet",
+        "pack_quantity": "15",
+        "pack_unit": "tablet"
+      },
+      "panel_count": null,
+      "evidence_file": "evidence/pe-dolo.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP001",
+      "kind": "lab",
+      "item_id": "LAB001",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "8",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP002",
+      "kind": "lab",
+      "item_id": "LAB002",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "1",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP003",
+      "kind": "lab",
+      "item_id": "LAB003",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "12",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP004",
+      "kind": "lab",
+      "item_id": "LAB004",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "1",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP005",
+      "kind": "lab",
+      "item_id": "LAB005",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "3",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP006",
+      "kind": "lab",
+      "item_id": "LAB006",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "10",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP007",
+      "kind": "lab",
+      "item_id": "LAB007",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "1",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP008",
+      "kind": "lab",
+      "item_id": "LAB008",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "3",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP009",
+      "kind": "lab",
+      "item_id": "LAB009",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "24",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP010",
+      "kind": "lab",
+      "item_id": "LAB010",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ],
+      "platform": "pharmeasy",
+      "source_url": "https://pharmeasy.in/diagnostics/all-tests/delhi-127",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "24",
+      "evidence_file": "evidence/pe-labs.json",
+      "audited_at": "2026-10-31"
+    },
+    {
+      "observation_id": "LP011",
+      "kind": "lab",
+      "item_id": "LAB009",
+      "classification": "conflicting",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "cbc_30_vs_24_parameters",
+        "conflicting_price_information",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "primary_price_399_vs_city_table_430",
+        "specimen_not_captured",
+        "variant_not_exact"
+      ],
+      "platform": "apollo_247",
+      "source_url": "https://www.apollo247.com/lab-tests/complete-blood-count-cbc-c-delhi",
+      "city": "Delhi",
+      "observed_at": "2026-10-30",
+      "observed_at_precision": "date",
+      "price_basis": "1 investigation",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "panel_count": "30",
+      "evidence_file": "evidence/apollo-cbc.json",
+      "audited_at": "2026-10-31"
+    }
+  ],
+  "quotes": [],
+  "comparisons": [],
+  "raw_manifest": {
+    "medicine_catalogue.csv": "0f78c83e12a2a5a3620ebeeea7dc6ad75912f0424e549d3198a4c836d79af544",
+    "medicine_prices.csv": "f2047b266e88f4a8ccab5c27fa87e2149b84c3852dfe42afd670caa97ab58e14",
+    "lab_catalogue.csv": "81eaa0e6c9b9507052e5a6882304c1fdc5ed388efefd2cfe80fa563f8e73eaed",
+    "lab_prices.csv": "c52ccb9006ccae04aec3819cbabe09e72803ded4507bca33e1cab27250ffa4f0",
+    "collection_report.md": "6aad8b6196d934c3171b7927385a8eab0c0a18cfbb5826504bb418c93e8f6059",
+    "evidence/1mg-list.json": "5fe560f7c00381a224c73cb439d9205703592c0dea3c392edfe988f7c0584aae",
+    "evidence/apollo-cbc.json": "bd74a36cc9702508ea498bdc6567d64662cb41b421ff2aa301be8d37e4025cd1",
+    "evidence/pe-dolo.json": "58b9d0c1a5c28405deeaaba36ce0f20a28418622deb8b8a005aebd0710ac9064",
+    "evidence/pe-labs.json": "47f9039be8f86b0d42e8f5c9bddaee21986b6e9e6f335775eb7bb560507ed4c1"
+  }
+}

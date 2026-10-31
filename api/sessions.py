@@ -26,6 +26,7 @@ class DemoSession:
     strip_state: dict = field(default_factory=dict)
     scheduling_revision: str = field(default_factory=lambda: secrets.token_urlsafe(24))
     scheduling_state: dict = field(default_factory=dict)
+    matching_state: dict = field(default_factory=dict)
     prescription_image: bytes | None = None
     prescription_mime: str | None = None
 
@@ -35,6 +36,7 @@ class DemoSession:
         self.scheduling_state = {}
 
     def invalidate(self):
+        self.matching_state = {}
         self.invalidate_scheduling()
         self.revision = secrets.token_urlsafe(24)
         self.reviewed = False

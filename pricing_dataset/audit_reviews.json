@@ -1,0 +1,450 @@
+{
+  "schema_version": "15B.1",
+  "raw_manifest": {
+    "medicine_catalogue.csv": "0f78c83e12a2a5a3620ebeeea7dc6ad75912f0424e549d3198a4c836d79af544",
+    "medicine_prices.csv": "f2047b266e88f4a8ccab5c27fa87e2149b84c3852dfe42afd670caa97ab58e14",
+    "lab_catalogue.csv": "81eaa0e6c9b9507052e5a6882304c1fdc5ed388efefd2cfe80fa563f8e73eaed",
+    "lab_prices.csv": "c52ccb9006ccae04aec3819cbabe09e72803ded4507bca33e1cab27250ffa4f0",
+    "collection_report.md": "6aad8b6196d934c3171b7927385a8eab0c0a18cfbb5826504bb418c93e8f6059",
+    "evidence/1mg-list.json": "5fe560f7c00381a224c73cb439d9205703592c0dea3c392edfe988f7c0584aae",
+    "evidence/apollo-cbc.json": "bd74a36cc9702508ea498bdc6567d64662cb41b421ff2aa301be8d37e4025cd1",
+    "evidence/pe-dolo.json": "58b9d0c1a5c28405deeaaba36ce0f20a28418622deb8b8a005aebd0710ac9064",
+    "evidence/pe-labs.json": "47f9039be8f86b0d42e8f5c9bddaee21986b6e9e6f335775eb7bb560507ed4c1"
+  },
+  "reviews": [
+    {
+      "observation_id": "MP001",
+      "raw_sha256": "933e93a87cb85ebd8ff437fc5bb3d26e95b965e19aabd520920b66386f7ba4f6",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "tablet",
+        "pack_quantity": "15",
+        "pack_unit": "tablet"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP002",
+      "raw_sha256": "1ae2e5e34ce7e0c296935f33df8ed596e00a13e42686e8ff4f24d612bd1b016e",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "tablet",
+        "pack_quantity": "15",
+        "pack_unit": "tablet"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP003",
+      "raw_sha256": "1468b9a3a02fd829527522a13227857e6995e85a86ed77d84f30f3ef33f0aec5",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "suspension",
+        "pack_quantity": "60",
+        "pack_unit": "ml"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured",
+        "concentration_denominator_not_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP004",
+      "raw_sha256": "25d552bf8ed003f5952db89e4641723de8c94ea057412568ba1d10a9b725fa1e",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": "1000 mg",
+        "dosage_form": "tablet",
+        "pack_quantity": "10",
+        "pack_unit": "tablet"
+      },
+      "reasons": [
+        "ingredient_not_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP005",
+      "raw_sha256": "df111ca57eec5592da6fd299f9edfa2625980d605a08c974e38c5077313d6368",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "oral drops",
+        "pack_quantity": "15",
+        "pack_unit": "ml"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP006",
+      "raw_sha256": "08482845c5f7b6fed7cb81cc484709fd634462958fd4b924e35da09d2fae1487",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "suspension",
+        "pack_quantity": "60",
+        "pack_unit": "ml"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured",
+        "concentration_denominator_not_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP007",
+      "raw_sha256": "4bf8adca23947d4744ab26dcb1d1176dddb62378e4eaff309c9bb662754a88e3",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "suspension",
+        "pack_quantity": "60",
+        "pack_unit": "ml"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured",
+        "concentration_denominator_not_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP008",
+      "raw_sha256": "0dba59f5b78b9bbf1d7b044dcec695cec7126952a8a4d456ce7ddbca72917cb5",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": "1000 mg",
+        "dosage_form": "infusion",
+        "pack_quantity": "100",
+        "pack_unit": "ml"
+      },
+      "reasons": [
+        "ingredient_not_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "MP009",
+      "raw_sha256": "6bf58c9c2a52fa008822872183f0235f00ddbf37d276701a98c3c682b8252569",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "ingredient": null,
+        "strength": null,
+        "dosage_form": "tablet",
+        "pack_quantity": "15",
+        "pack_unit": "tablet"
+      },
+      "reasons": [
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ],
+      "ambiguous": false,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP001",
+      "raw_sha256": "7556e6ec5024585d5e6027a2c3e7103dcf77599c94d966d217f65bb853909690",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP002",
+      "raw_sha256": "6c8e3e33969e55d7cda081b43f35788a0ee63e48509be37d5e2cef5e48024c44",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP003",
+      "raw_sha256": "74d4e434cd60f9ececed86d753a03e252dc8c856c4799b1310bcb78c17c08b7f",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP004",
+      "raw_sha256": "4907277f9ed2049fa938894dc434db11749198728e0ca4b3f6db062c1460dad4",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP005",
+      "raw_sha256": "78ac3a4517e7bde1c47f6ce22f080d04f16b8d152feb169015577cdf4322c99a",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP006",
+      "raw_sha256": "8140d70ed548297cbb7f9f11afa67fbb607f1b53cdb211fbd0195378577f41c8",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP007",
+      "raw_sha256": "549217511bd87510bf419a45e84462d2ec93ef3596de708357eb693db4929c2e",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP008",
+      "raw_sha256": "57e3d6a73c1c76d66c786b25b88f7627aa2aeb16ad93360ea3ed04258e102c5a",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP009",
+      "raw_sha256": "d17568b492bb878cefc45bc79494ea7289078ea40093c2e5997af3343958da8e",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP010",
+      "raw_sha256": "a8794415574f3e1a188e424ebdbcb08078b716ee9f0c751e51b01206f594e1a0",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured"
+      ],
+      "ambiguous": true,
+      "conflict": false,
+      "offer": "conditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    },
+    {
+      "observation_id": "LP011",
+      "raw_sha256": "3a30b4ba8852207a4b695fbed05437948ca3a1ae31d2f9b8168e21521b3ed076",
+      "audited_at": "2026-10-31",
+      "identity": {
+        "identity_confirmed": false,
+        "analytes": null,
+        "specimen": null,
+        "method": null,
+        "preparation": null
+      },
+      "reasons": [
+        "specimen_not_captured",
+        "panel_components_not_captured",
+        "assay_method_not_captured",
+        "preparation_not_captured",
+        "primary_price_399_vs_city_table_430",
+        "cbc_30_vs_24_parameters"
+      ],
+      "ambiguous": true,
+      "conflict": true,
+      "offer": "unconditional",
+      "basis": "Offline inspection of original catalogue, raw observation and saved collector transcription; not a fresh web verification"
+    }
+  ]
+}

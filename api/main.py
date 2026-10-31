@@ -20,6 +20,7 @@ from .strip_routes import register_strip_routes
 from .downstream.scheduling import integration_factory
 from .downstream_routes import register_downstream_routes
 from .prescription_summary import build_summary
+from .team_routes import register_team_routes
 
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
 
@@ -37,6 +38,7 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
     register_section_routes(app,store,enabled_sections)
     register_strip_routes(app,store,enabled_sections)
     register_downstream_routes(app,store,enabled_sections)
+    register_team_routes(app,store,enabled_sections)
     allowed = tuple(origins or os.getenv("MEDISAATHI_ORIGINS", ",".join(DEFAULT_ORIGINS)).split(","))
     if any(origin == "*" for origin in allowed):
         raise ValueError("Explicit frontend origins are required")

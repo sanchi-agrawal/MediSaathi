@@ -1,0 +1,281 @@
+{
+  "schema_version": "15B.1",
+  "audited_at": "2026-10-31",
+  "raw_observations": 20,
+  "verified_medicine_quotes": 0,
+  "verified_lab_quotes": 0,
+  "classifications": {
+    "ambiguous": 10,
+    "conflicting": 1,
+    "provisional": 9,
+    "unavailable": 0,
+    "verified": 0
+  },
+  "exclusion_reason_counts": {
+    "assay_method_not_captured": 11,
+    "availability_not_verified": 20,
+    "cbc_30_vs_24_parameters": 1,
+    "concentration_denominator_not_captured": 3,
+    "conditional_or_unresolved_offer": 11,
+    "conflicting_price_information": 1,
+    "delhi_not_confirmed": 9,
+    "identity_incomplete": 20,
+    "ingredient_not_captured": 9,
+    "panel_components_not_captured": 11,
+    "preparation_not_captured": 11,
+    "primary_price_399_vs_city_table_430": 1,
+    "specimen_not_captured": 11,
+    "strength_not_fully_captured": 7,
+    "variant_not_exact": 1
+  },
+  "comparisons": [],
+  "excluded": [
+    {
+      "observation_id": "MP001",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "MP002",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "MP003",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "concentration_denominator_not_captured",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "MP004",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured"
+      ]
+    },
+    {
+      "observation_id": "MP005",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "MP006",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "concentration_denominator_not_captured",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "MP007",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "concentration_denominator_not_captured",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "MP008",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured"
+      ]
+    },
+    {
+      "observation_id": "MP009",
+      "classification": "provisional",
+      "reasons": [
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "delhi_not_confirmed",
+        "identity_incomplete",
+        "ingredient_not_captured",
+        "strength_not_fully_captured"
+      ]
+    },
+    {
+      "observation_id": "LP001",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP002",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP003",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP004",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP005",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP006",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP007",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP008",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP009",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP010",
+      "classification": "ambiguous",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "conditional_or_unresolved_offer",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "specimen_not_captured"
+      ]
+    },
+    {
+      "observation_id": "LP011",
+      "classification": "conflicting",
+      "reasons": [
+        "assay_method_not_captured",
+        "availability_not_verified",
+        "cbc_30_vs_24_parameters",
+        "conflicting_price_information",
+        "identity_incomplete",
+        "panel_components_not_captured",
+        "preparation_not_captured",
+        "primary_price_399_vs_city_table_430",
+        "specimen_not_captured",
+        "variant_not_exact"
+      ]
+    }
+  ]
+}

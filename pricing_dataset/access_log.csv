@@ -1,0 +1,6 @@
+platform,area,checked_date,status,source_url,notes
+tata_1mg,medicine,2026-10-30,public_page_read,https://www.1mg.com/categories/featured/top-brands/dolo-1716,Default Gurgaon; Delhi not established.
+pharmeasy,medicine,2026-10-30,public_page_read,https://pharmeasy.in/online-medicine-order/dolo-650mg-tab-15-s-44140,No pincode selected.
+pharmeasy,lab,2026-10-30,public_page_read,https://pharmeasy.in/diagnostics/all-tests/delhi-127,Delhi listing; conditional prices.
+apollo_247,lab,2026-10-30,public_page_read,https://www.apollo247.com/lab-tests/complete-blood-count-cbc-c-delhi,Conflicting price blocks and differing panel.
+apollo_247,medicine,2026-10-30,discovery_incomplete,https://www.apollo247.com/lab-tests/complete-blood-count-cbc-c-delhi,Medicine navigation links to apollopharmacy.in; no pharmacy-domain price silently substituted.

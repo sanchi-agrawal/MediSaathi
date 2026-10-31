@@ -1,0 +1,194 @@
+[
+  {
+    "commit": "5758fb01a164c13e0f38735ec83fadea2d4f890c",
+    "source": "medisaathi/matcher.py",
+    "target": "api/vendor/person2/matcher.py",
+    "sha256": "dcc031d736e97a743196052113282789d61791c6887ae2a7c1aa9d1e34d70fdc"
+  },
+  {
+    "commit": "5758fb01a164c13e0f38735ec83fadea2d4f890c",
+    "source": "medisaathi/data/medicines.csv",
+    "target": "api/vendor/person2/data/medicines.csv",
+    "sha256": "4c263dd2e584ddf70a6591a3e62b661bfaa4f51db42de75ec64acfbd773bcf1b"
+  },
+  {
+    "commit": "5758fb01a164c13e0f38735ec83fadea2d4f890c",
+    "source": "medisaathi/test_matcher_manual.py",
+    "target": "api/vendor/person2/test_matcher_manual.py",
+    "sha256": "d352e12ff8767fabe04d3345ed1ff826767e05b835ad6fb2549340f6a2b8ce05"
+  },
+  {
+    "commit": "e95a03166779fe2dbe501e868f9e8b4ee3025360",
+    "source": "medisaathi/reminders.py",
+    "target": "api/vendor/person3/reminders.py",
+    "sha256": "4d46eaf826c1d44fc7c1dd65964ac42b3f4a2c18c45832ea15d9f1c99b762ec5"
+  },
+  {
+    "commit": "e95a03166779fe2dbe501e868f9e8b4ee3025360",
+    "source": "medisaathi/tests/test_reminders.py",
+    "target": "api/vendor/person3/tests/test_reminders.py",
+    "sha256": "b200a0b13a948a1b36bd4469c0377724463b7712601b6eddb621e72a632f4345"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/HANDOFF.md",
+    "target": "pricing_dataset/HANDOFF.md",
+    "sha256": "dca01a652736d068e16421b8feffb59bc38f52b7b6916dc6c7342112ce906530"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/MILESTONE-15B.md",
+    "target": "pricing_dataset/MILESTONE-15B.md",
+    "sha256": "e84c65e2e12e1cf46f24710449b41ef48469b32dd28efec0dc853270a2e08e6e"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/README.md",
+    "target": "pricing_dataset/README.md",
+    "sha256": "5c9ca733d6464a4c29a9a648994ec9121d9fc423a4994f7a497e04658bfd4a02"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/__init__.py",
+    "target": "pricing_dataset/__init__.py",
+    "sha256": "70fdcf9ffc88fbcbba7ffec88f906488a418ca092433a6bee0b14e28cd7b8184"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/access_log.csv",
+    "target": "pricing_dataset/access_log.csv",
+    "sha256": "80997fe3392a2f97f5e6d8bddf00cf0aedd8aaf7810eb226e91e16241d09a78b"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/audit.py",
+    "target": "pricing_dataset/audit.py",
+    "sha256": "cb3de156839ab4ebcd2323f898b85c02cf6a2a52eeb467c1674e36af1b9284bb"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/audit_reviews.json",
+    "target": "pricing_dataset/audit_reviews.json",
+    "sha256": "26d743ec2aed9fd4d01ebfd7308f7821665403a31c378f354ce6ec55d73bc62e"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/collection_report.md",
+    "target": "pricing_dataset/collection_report.md",
+    "sha256": "6aad8b6196d934c3171b7927385a8eab0c0a18cfbb5826504bb418c93e8f6059"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/collection_targets.csv",
+    "target": "pricing_dataset/collection_targets.csv",
+    "sha256": "edfb29e7df2abcfeb7cb554aa0e4aa7f4e9e7ee19cfc4176eb9f4b9c7e88cf83"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/coverage.json",
+    "target": "pricing_dataset/coverage.json",
+    "sha256": "14542c7227a2d930f9bdf81f3e90bd7442cff8a8f95e74fec8fadf4870d969fd"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/coverage_report.md",
+    "target": "pricing_dataset/coverage_report.md",
+    "sha256": "ff32a38a57a2229034fc360f5d06bcde1f841b57cbdf506234d43f0cf5eee3b2"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/evidence/1mg-list.json",
+    "target": "pricing_dataset/evidence/1mg-list.json",
+    "sha256": "5fe560f7c00381a224c73cb439d9205703592c0dea3c392edfe988f7c0584aae"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/evidence/apollo-cbc.json",
+    "target": "pricing_dataset/evidence/apollo-cbc.json",
+    "sha256": "bd74a36cc9702508ea498bdc6567d64662cb41b421ff2aa301be8d37e4025cd1"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/evidence/pe-dolo.json",
+    "target": "pricing_dataset/evidence/pe-dolo.json",
+    "sha256": "58b9d0c1a5c28405deeaaba36ce0f20a28418622deb8b8a005aebd0710ac9064"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/evidence/pe-labs.json",
+    "target": "pricing_dataset/evidence/pe-labs.json",
+    "sha256": "47f9039be8f86b0d42e8f5c9bddaee21986b6e9e6f335775eb7bb560507ed4c1"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/lab_catalogue.csv",
+    "target": "pricing_dataset/lab_catalogue.csv",
+    "sha256": "81eaa0e6c9b9507052e5a6882304c1fdc5ed388efefd2cfe80fa563f8e73eaed"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/lab_prices.csv",
+    "target": "pricing_dataset/lab_prices.csv",
+    "sha256": "c52ccb9006ccae04aec3819cbabe09e72803ded4507bca33e1cab27250ffa4f0"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/lookup.py",
+    "target": "pricing_dataset/lookup.py",
+    "sha256": "c1dd62fb2d04af3be337faea4d50d405a1f9209acec4001d8659dda4aa8bc2e7"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/medicine_catalogue.csv",
+    "target": "pricing_dataset/medicine_catalogue.csv",
+    "sha256": "0f78c83e12a2a5a3620ebeeea7dc6ad75912f0424e549d3198a4c836d79af544"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/medicine_prices.csv",
+    "target": "pricing_dataset/medicine_prices.csv",
+    "sha256": "f2047b266e88f4a8ccab5c27fa87e2149b84c3852dfe42afd670caa97ab58e14"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/observation_audit.json",
+    "target": "pricing_dataset/observation_audit.json",
+    "sha256": "29d4dec8f42c5176b880ff378ac6b16e9c0cd0fd02cccb1f1b318d7fe1ee9761"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/test_integration.py",
+    "target": "pricing_dataset/test_integration.py",
+    "sha256": "63d0b5b12c63136cc7cb28c2f303f1dd9ce935e6a1abbf1ef1bf610549ddd9cf"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/test_workflow.py",
+    "target": "pricing_dataset/test_workflow.py",
+    "sha256": "3ce093af0f3e93897d71905e86310e3e2bd08e5571b8a19e8af23346fe20ba24"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/verified_quotes.json",
+    "target": "pricing_dataset/verified_quotes.json",
+    "sha256": "badc68f08d136441a93d44ca025dad6da8748048b6fc796c705c3a3c189bab6a"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/workflow.py",
+    "target": "pricing_dataset/workflow.py",
+    "sha256": "2cbfdd34ed9349c5739131b79576f6aee9e2c129d14b8a3c135a7328541a4ee0"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/.gitignore",
+    "target": "pricing_dataset/.gitignore",
+    "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b"
+  },
+  {
+    "commit": "3f9664b",
+    "source": "pricing_dataset/.gitattributes",
+    "target": "pricing_dataset/.gitattributes",
+    "sha256": "25f21212095cf45ea498db1e19718a90c4f6b13d4f511207c2792d6e21050cfa"
+  }
+]

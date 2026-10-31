@@ -10,6 +10,7 @@ export const dashboardLinks = [
   { to:'/dashboard/investigations', label:'Investigations', icon:FlaskConical },
   { to:'/dashboard/expiry', label:'Expiry scanner', icon:ScanLine },
   { to:'/dashboard/schedule', label:'Schedule & reminders', icon:CalendarDays },
+  { to:'/dashboard/medicine-pricing', label:'Medicine pricing', icon:IndianRupee },
   { to:'/dashboard/lab-costs', label:'Lab costs', icon:IndianRupee },
 ]
 export default function DashboardLayout() {
