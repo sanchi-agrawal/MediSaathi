@@ -1,5 +1,5 @@
 [
-  {"raw_text": "Tab Dolo 650 1-0-1 x 5 days after food", "name": "Dolo 650", "salt": "Paracetamol", "strength": "650 mg", "form": "tablet", "frequency_pattern": "1-0-1", "duration_days": 5, "timing": "after food", "confidence": 0.95, "needs_review": false},
-  {"raw_text": "Tab Cetirizine 10mg 0-0-1 x 5 days", "name": "Cetirizine", "salt": "Cetirizine", "strength": "10 mg", "form": "tablet", "frequency_pattern": "0-0-1", "duration_days": 5, "timing": "bedtime", "confidence": 0.9, "needs_review": false},
-  {"raw_text": "Syp ???? 5ml BD x ?", "name": "unclear", "salt": null, "strength": null, "form": "syrup", "frequency_pattern": "BD", "duration_days": null, "timing": null, "confidence": 0.3, "needs_review": true}
+  {"raw_text": "Tab Dolo 650 1-0-1 x 5 days after food", "name": "Dolo 650", "salt": null, "strength": null, "form": "tablet", "frequency_pattern": "1-0-1", "duration_days": 5, "timing": "after food", "confidence": 0.95, "needs_review": true},
+  {"raw_text": "Tab Cetirizine 10mg 0-0-1 x 5 days", "name": "Cetirizine", "salt": null, "strength": "10mg", "form": "tablet", "frequency_pattern": "0-0-1", "duration_days": 5, "timing": null, "confidence": 0.9, "needs_review": true},
+  {"raw_text": "Syp ???? 5ml BD x ?", "name": null, "salt": null, "strength": null, "form": "syrup", "frequency_pattern": "BD", "duration_days": null, "timing": null, "confidence": 0.3, "needs_review": true}
 ]
