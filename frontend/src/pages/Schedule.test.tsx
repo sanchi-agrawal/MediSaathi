@@ -1,0 +1,41 @@
+// @vitest-environment jsdom
+import {it,expect,vi,afterEach} from 'vitest'
+import {render,screen,fireEvent,waitFor,cleanup,act} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import {MemoryRouter} from 'react-router-dom'
+import Schedule from './Schedule'
+import type {ScheduleContext,SchedulingClient,SchedulePlan,ScheduleSuccess} from '../lib/scheduling'
+import {setLanguage} from '../lib/language'
+import {invalidateSchedulingView,notifySchedulingChanged} from '../lib/workflowEvents'
+const med={raw_text:'DEMO 1 tablet BD morning and night for 3 days',name:'DEMO',salt:null,strength:null,form:'tablet' as const,frequency_pattern:'BD',duration_days:3,timing:'morning and night',confidence:null,needs_review:false}
+const ins={instruction_id:'i',medicine_name_raw:'DEMO',raw_text:med.raw_text,dose_quantity_raw:'1',dose_unit_raw:'tablet',frequency_raw:'BD',route_raw:null,timing_raw:'morning and night',duration_raw:'3 days',uncertainty_reasons:[],needs_review:false,confirmation_required:true as const}
+const link={association_id:'link',medicine_ref:'medicine_001',instruction_id:'i'}
+const template={dose_quantity:1,dose_unit:'tablet' as const,duration_days:3,administrations_by_slot:{morning:1,noon:0,night:1,bedtime:0}}
+const initial:ScheduleContext={analysis_id:'a',medicine_revision:'m',instruction_revision:'i',scheduling_revision:'s',ready:true,status:'associated',medicines:[med],instructions:[ins],instruction_issues:[],association:link,associations:[link],automatic:[{medicine_ref:'medicine_001',association:link,template,issues:[]}],course_results:[],plan:null,result:null,error:null}
+function client(seed=initial):SchedulingClient{
+ let state=structuredClone(seed)
+ return {current:vi.fn(async()=>state),associate:vi.fn(),clear:vi.fn(),invalidate:vi.fn(async()=>{state={...state,plan:null,result:null,course_results:[],status:'associated'};return state}),review:vi.fn(async(s,plan:SchedulePlan)=>{state={...s,plan,status:'reviewed',result:null};return state}),approve:vi.fn(async(s)=>{const p=s.plan!;const end=new Date(p.start_date+'T00:00:00Z');end.setUTCDate(end.getUTCDate()+p.duration_days-1);const payload:ScheduleSuccess={name:'DEMO',status:'ok',reason:null,doses_by_slot:{morning:1,noon:0,night:1,bedtime:0},units_per_day:2,duration_days:3,total_units:6,unit:'tablet',start_date:p.start_date,end_date:end.toISOString().slice(0,10),refill_date:null};const result={derived_id:'d',payload};state={...s,status:'succeeded',result,course_results:[{association:link,plan:p,result}]};return state})}
+}
+async function start(api=client()){render(<MemoryRouter><Schedule client={api}/></MemoryRouter>);await screen.findByText('Your Medicine Schedule');await screen.findByLabelText('When will you start taking your medicine?');return api}
+async function generate(api=client()){await start(api);fireEvent.change(screen.getByLabelText('When will you start taking your medicine?'),{target:{value:'2026-11-03'}});await userEvent.setup().click(screen.getByRole('button',{name:'Generate My Schedule'}));await screen.findByRole('region',{name:'Calculated schedule'});return api}
+afterEach(()=>{cleanup();setLanguage('en');vi.restoreAllMocks()})
+it('generates from a date alone using server-prepared source data and separate review/approval calls',async()=>{const api=await generate();expect(api.review).toHaveBeenCalledWith(expect.anything(),{...template,start_date:'2026-11-03'});expect(api.approve).toHaveBeenCalledTimes(1);expect(api.current).toHaveBeenCalledTimes(2);expect(screen.queryByLabelText('Dose quantity')).toBeNull();expect(screen.queryByRole('combobox')).toBeNull();expect(screen.getByText(/5 Nov 2026/)).toBeDefined()})
+it.each(['dose_missing','duration_missing','frequency_unsupported','association_required'])('blocks %s without inventing inputs',async issue=>{const api=client({...initial,automatic:[{medicine_ref:'medicine_001',association:link,template:null,issues:[issue]}]});await start(api);fireEvent.change(screen.getByLabelText('When will you start taking your medicine?'),{target:{value:'2026-11-03'}});expect((screen.getByRole('button',{name:'Generate My Schedule'}) as HTMLButtonElement).disabled).toBe(true);expect(screen.getAllByRole('link',{name:'Return to Prescription Review'}).length).toBeGreaterThan(0);expect(api.review).not.toHaveBeenCalled()})
+it('date changes hide old results and invalidate the saved approval before regeneration',async()=>{const api=await generate();fireEvent.change(screen.getByLabelText('When will you start taking your medicine?'),{target:{value:'2026-11-09'}});await waitFor(()=>expect(api.invalidate).toHaveBeenCalledTimes(1));expect(screen.queryByRole('region',{name:'Calculated schedule'})).toBeNull();await userEvent.setup().click(screen.getByRole('button',{name:'Generate My Schedule'}));await screen.findByRole('region',{name:'Calculated schedule'});expect(vi.mocked(api.review).mock.calls[1][1].start_date).toBe('2026-11-09')})
+it('source edits immediately hide schedules',async()=>{await generate();act(()=>invalidateSchedulingView());expect(screen.queryByRole('region',{name:'Calculated schedule'})).toBeNull();expect(screen.getByRole('alert').textContent).toContain('Prescription information changed')})
+it('rechecks current revisions and never approves stale source',async()=>{const api=client();await start(api);vi.mocked(api.current).mockResolvedValue({...initial,medicine_revision:'changed'});fireEvent.change(screen.getByLabelText('When will you start taking your medicine?'),{target:{value:'2026-11-03'}});await userEvent.setup().click(screen.getByRole('button',{name:'Generate My Schedule'}));await screen.findByRole('alert');expect(api.review).not.toHaveBeenCalled();expect(api.approve).not.toHaveBeenCalled()})
+it('translates the date-only workflow immediately without changing medicine names',async()=>{await start();act(()=>setLanguage('hi'));expect(screen.getByText('आपकी दवा की समय-सारणी')).toBeTruthy();expect(screen.getByLabelText('आप अपनी दवा कब से लेना शुरू करेंगे?')).toBeTruthy();expect(screen.getByRole('button',{name:'मेरी समय-सारणी बनाएँ'})).toBeTruthy();expect(screen.getByText('DEMO')).toBeTruthy()})
+it('does not show results after backend failure',async()=>{const api=client();vi.mocked(api.approve).mockRejectedValue(new Error('Unavailable'));await start(api);fireEvent.change(screen.getByLabelText('When will you start taking your medicine?'),{target:{value:'2026-11-03'}});await userEvent.setup().click(screen.getByRole('button',{name:'Generate My Schedule'}));await screen.findByRole('alert');expect(screen.queryByRole('region',{name:'Calculated schedule'})).toBeNull()})
+it('refreshes an already mounted schedule after a verified association change without a browser reload',async()=>{
+ const api=client({...initial,association:null,associations:[],automatic:[{medicine_ref:'medicine_001',association:null,template:null,issues:['association_required']}]});await start(api)
+ expect(screen.getByText('Medicine-instruction link not confirmed')).toBeTruthy()
+ vi.mocked(api.current).mockResolvedValue(initial);act(()=>notifySchedulingChanged())
+ await screen.findByText('Ready to schedule');expect(api.current).toHaveBeenCalledTimes(2)
+ expect(screen.getByText('Confirmed dose and unit')).toBeTruthy()
+})
+it('uses separate prepared instructions for multiple medicines with one selected date',async()=>{
+ const second={association_id:'link2',medicine_ref:'medicine_002',instruction_id:'i2'}
+ const seed:ScheduleContext={...initial,medicines:[med,{...med,name:'DEMO-B'}],instructions:[ins,{...ins,instruction_id:'i2',dose_quantity_raw:'2',duration_raw:'5 days'}],automatic:[...initial.automatic!,{medicine_ref:'medicine_002',association:second,template:{...template,dose_quantity:2,duration_days:5},issues:[]}]}
+ const api=client(seed);await start(api);fireEvent.change(screen.getByLabelText('When will you start taking your medicine?'),{target:{value:'2026-11-03'}});await userEvent.setup().click(screen.getByRole('button',{name:'Generate My Schedule'}));await waitFor(()=>expect(api.approve).toHaveBeenCalledTimes(2))
+ expect(vi.mocked(api.review).mock.calls.map(c=>c[1])).toEqual([{...template,start_date:'2026-11-03'},{...template,dose_quantity:2,duration_days:5,start_date:'2026-11-03'}])
+})

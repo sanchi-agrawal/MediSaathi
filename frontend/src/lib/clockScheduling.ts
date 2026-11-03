@@ -1,0 +1,15 @@
+import { ApiError } from './prescriptions'
+export interface ClockMedicine{medicine_ref:string;name:string|null;dose_quantity:string|null;dose_unit:string|null;duration_days:number|null;food_timing:string|null;slots:string[];administrations_per_day:number;eligible:boolean;issues:string[];review_path:string;review_details?:{missing_fields:string[];unsupported_fields:string[];confidence_state:'unknown'|'low'|'acceptable';can_resolve:boolean}|null}
+export interface ClockCourse{start_date:string;timezone:'Asia/Kolkata';medicines:{medicine_ref:string;clock_times:string[];result:{name:string;start_date:string;end_date:string;duration_days:number;total_units:number;unit:string;refill_date:string|null};days:{date:string;administrations:{slot:string|null;time:string;quantity:number;unit:string;at:string}[]}[]}[];blocked:ClockMedicine[]}
+export interface ClockState{analysis_id:string;medicine_revision:string;instruction_revision:string;scheduling_revision:string;ready:boolean;medicines:ClockMedicine[];course:ClockCourse|null;timezone:'Asia/Kolkata';contract:'confirmed-clock-schedule-v1'}
+async function request<T>(path:string,body?:unknown):Promise<T>{
+ let response:Response
+ try{response=await fetch('/api'+path,{method:body===undefined?'GET':'POST',credentials:'include',cache:'no-store',headers:{'X-MediSaathi-Action':'review',...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)})}catch{throw new ApiError('network_error','Could not reach the local Python API.')}
+ let value:unknown;try{value=await response.json()}catch{throw new ApiError('invalid_response','The API did not return JSON.')}
+ if(!response.ok){const d=(value as {detail?:{category?:string;message?:string}}).detail;const fallback=response.status===404||response.status===405?['api_route_unavailable','The clock scheduling endpoint is not loaded. Restart the current FastAPI backend and check the Vite proxy.']:response.status===401?['session_expired','Sign in again and restore the current prescription workspace.']:response.status===409?['stale_result','Prescription state changed. Restore the current server state before generating.']:response.status===422?['invalid_input','Check the start date and provide exactly one valid time for each prescribed administration.']:['backend_unavailable','Scheduling could not complete. No successful calendar was accepted and no automatic retry was made.'];throw new ApiError(d?.category||fallback[0],d?.message||fallback[1],response.status)}
+ return value as T
+}
+export const clockClient={
+ current:()=>request<ClockState>('/clock-scheduling/current'),
+ generate:(state:ClockState,start_date:string,times:Record<string,string[]>)=>request<ClockCourse>(`/prescriptions/${encodeURIComponent(state.analysis_id)}/schedule/clock-generate`,{medicine_revision:state.medicine_revision,instruction_revision:state.instruction_revision,scheduling_revision:state.scheduling_revision,start_date,medicines:state.medicines.filter(m=>m.eligible).map(m=>({medicine_ref:m.medicine_ref,clock_times:times[m.medicine_ref]||[]}))}),
+}

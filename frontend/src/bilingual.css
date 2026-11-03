@@ -1,0 +1,5 @@
+/* Keep Hindi readable without changing the English layout or design tokens. */
+html:lang(hi) body{font-family:"Noto Sans Devanagari",Inter,"Segoe UI",Arial,sans-serif}
+html:lang(hi) .button,html:lang(hi) .badge{white-space:normal;line-height:1.65;text-align:center}
+html:lang(hi) .eyebrow,html:lang(hi) .micro,html:lang(hi) .badge{letter-spacing:.02em}
+html:lang(hi) .workflow-steps span{line-height:1.65}

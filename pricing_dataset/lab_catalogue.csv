@@ -1,0 +1,11 @@
+item_id,investigation_name,source_url,verified_date,verification_status,notes
+LAB001,Renal / Kidney Function Test (RFT / KFT),https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB002,Fasting Blood Sugar (FBS) Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB003,Liver Function Test (LFT),https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB004,Erythrocyte Sedimentation Rate (ESR) Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB005,Serum Electrolytes Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB006,Lipid Profile Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB007,Platelet Count Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB008,Free Thyroid Profile Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB009,CBC Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.
+LAB010,Urine Routine Test,https://pharmeasy.in/diagnostics/all-tests/delhi-127,2026-10-30,verified_identity,Investigation family only; panel contents and performing laboratory require matching across platforms.

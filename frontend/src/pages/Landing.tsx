@@ -1,0 +1,35 @@
+import { useLanguage as useUiLanguage, translate as tr } from '../lib/language'
+import { lazy, Suspense } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, ArrowUpRight, Check, FileScan, Pill, ClipboardList, ShieldCheck, Sparkles, Menu, X } from 'lucide-react'
+import { useState } from 'react'
+import { LanguageToggle } from '../components/LanguageToggle'
+import { useLanguage } from '../lib/language'
+import { AnatomyFallback } from '../components/AnatomyFallback'
+import { Badge, Brand } from '../components/ui'
+
+const Anatomy = lazy(() => import('../components/Anatomy'))
+const features = [
+  { icon: FileScan, title: 'Prescription analysis', text: 'A clearer view of what is written. Review extracted medicine details alongside your original image.', tag: 'START WITH A SCAN' },
+  { icon: ClipboardList, title: 'Medication instructions', text: 'Keep explicit dosage, timing and duration together, with uncertain details marked for your review.', tag: 'CLARITY IN EVERY DETAIL' },
+  { icon: Pill, title: 'Medicine management', text: 'A home for reviewed medicines and your care routine. Schedule integration is coming next.', tag: 'MAKE SPACE FOR YOUR HEALTH' },
+]
+export default function Landing() {
+  useUiLanguage()
+
+  const { language, t } = useLanguage()
+  const [open, setOpen] = useState(false)
+  return <div className="landing" lang={language}>
+    <header className="landing-nav wrap"><Brand/><button className="icon-button mobile-menu" onClick={() => setOpen(!open)} aria-label={t('Toggle navigation')} aria-expanded={open}>{open ? <X/> : <Menu/>}</button><nav className={open ? 'open' : ''} aria-label={t('Main navigation')}><a href="#features" onClick={()=>setOpen(false)}>{t('The experience')}</a><a href="#how-it-works" onClick={()=>setOpen(false)}>{t('How it works')}</a><Link to="/dashboard">{t('Explore dashboard')}<ArrowUpRight size={14}/></Link></nav><div className="nav-actions"><LanguageToggle/><Link to="/login" className="nav-signin">{t('Sign in')}</Link><Link to="/dashboard/analysis" className="button small">{t('Get started')}<ArrowRight size={15}/></Link></div></header>
+    <main id="main-content">
+      <section className="hero wrap">
+        <div className="hero-copy"><Badge tone="coral"><span className="status-dot"/> {t("A LITTLE CLARITY. A LITTLE MORE CARE.")}</Badge><h1>{language === "hi" ? <>{t("Hindi hero first")}<br/><span>{t("Hindi hero second")}</span></> : <>{tr("Understand Your")}<br/>{tr("Prescriptions.")}<br/><span>{tr("Take Control")}</span><br/>{tr("of Your Health.")}</>}</h1><p>{t('Your health deserves to make sense. Meet a calmer way to review prescriptions, understand instructions, and keep your next steps in view.')}</p><div className="hero-actions"><Link className="button" to="/dashboard/analysis">{t('Start with your prescription')}<ArrowUpRight size={19}/></Link><Link className="button secondary" to="/dashboard">{t('Explore dashboard')}</Link></div><div className="hero-notes"><span><ShieldCheck size={16}/> {t("Review before you confirm")}</span><span><Check size={16}/> {t("Built with India in mind")}</span></div></div>
+        <div className="hero-visual"><div className="hero-visual-heading"><span className="micro">{t('A BETTER CONNECTION TO YOUR HEALTH')}</span><span className="live-label"><span className="status-dot"/> {t("INTERACTIVE")}</span></div><Suspense fallback={<AnatomyFallback loading/>}><Anatomy/></Suspense><div className="floating-note"><Sparkles size={17}/><span>{t('A clearer picture.')}<br/><strong>{t('A more informed you.')}</strong></span></div></div>
+      </section>
+      <section className="principles wrap" aria-label={t('Our approach')}><span>{t('THOUGHTFULLY BUILT')}<br/><strong>{t('Around your everyday care.')}</strong></span><div><FileScan/><span>{t('Your prescription,')}<br/><strong>{t('in focus')}</strong></span></div><div><ShieldCheck/><span>{t('Your review,')}<br/><strong>{t('always first')}</strong></span></div><div><Pill/><span>{t('Your next steps,')}<br/><strong>{t('together')}</strong></span></div></section>
+      <section className="features-section wrap" id="features"><div className="section-heading"><div><span className="eyebrow">{t('LESS OVERWHELM. MORE UNDERSTANDING.')}</span><h2>{t('Care starts with clarity.')}</h2></div><p>{t('From the first scan to the details that matter.')}<br/>{t('One considered space for your healthcare.')}</p></div><div className="feature-grid core-features">{features.map(({icon: Icon, title, text, tag},i)=><Link to={title==='Medicine management'?'/dashboard/medicines':'/dashboard/analysis'} className="feature-card" key={t(title)}><div className="feature-card-top"><span className={`icon-box ${i%2?'blue':'coral'}`}><Icon size={23}/></span><ArrowUpRight size={20}/></div><span className="micro">{t(tag)}</span><h3>{t(title)}</h3><p>{t(text)}</p></Link>)}</div></section>
+      <section className="how-section wrap" id="how-it-works"><div className="section-heading"><div><span className="eyebrow">{t('A SMALL STEP TOWARD UNDERSTANDING')}</span><h2>{t('Your prescription. Made clearer.')}</h2></div><Badge>{t('Medicines OCR · Python API required')}</Badge></div><div className="steps">{[['01','Upload your image','Choose a clear prescription photo or take a new one.'],['02','Review every detail','Check extracted text, correct errors and keep unknowns visible.'],['03','Confirm, then understand','Save and explicitly confirm medicines before requesting an explanation.']].map(([n,title,text])=><div key={n}><span className="step-number">{n}</span><h3>{t(title)}</h3><p>{t(text)}</p></div>)}</div></section>
+      <section className="closing wrap"><div><span className="eyebrow">{t('YOUR HEALTH. YOUR PACE.')}</span><h2>{t('A little less confusion.')}<br/><span>{t('A little more confidence.')}</span></h2><p>{t('Start with a prescription. Stay in control of every detail.')}</p><Link className="button" to="/dashboard/analysis">{t('Explore MediSaathi')}<ArrowRight size={18}/></Link></div><div className="language-art" aria-label={t('Language explanation options planned')}><span>समझें।</span><strong>{t('Understand.')}</strong><span>{t('Apni sehat, samjhein.')}</span><small>{t('English · Hindi · Hinglish explanations')}<br/>{t('Available once the AI backend is connected.')}</small></div></section>
+    </main><footer className="site-footer wrap"><div><Brand/><p>{t('Your health, understood.')}</p></div><p>{t('An educational and information tool, not medical advice.')}<br/>{t('Always verify prescription details with your healthcare professional.')}<br/>{t('Handwriting extraction is experimental.')}</p><span>{t('MADE WITH CARE, FOR INDIA')}<br/>© {new Date().getFullYear()} MediSaathi</span></footer>
+  </div>
+}
