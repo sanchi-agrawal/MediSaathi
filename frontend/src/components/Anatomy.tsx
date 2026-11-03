@@ -1,3 +1,4 @@
+import { useLanguage as useUiLanguage, translate as tr } from '../lib/language'
 import { useEffect, useRef, useState } from 'react'
 import * as T from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
@@ -32,6 +33,8 @@ function disposeTree(root: T.Object3D) {
 }
 
 export default function Anatomy() {
+  useUiLanguage()
+
   const { t } = useLanguage()
   const host = useRef<HTMLDivElement>(null), selection = useRef(1), reset = useRef(() => {})
   const [selected, setSelected] = useState(1), [failed, setFailed] = useState(false)
@@ -261,7 +264,7 @@ export default function Anatomy() {
       <div className="rotation-help"><span className="rotation-instruction" id="anatomy-help"><MousePointer2 size={19} aria-hidden="true"/>{t('Move your pointer to rotate. Drag to explore.')}</span><button onClick={() => reset.current()}><RotateCcw size={17} aria-hidden="true"/>{t('Reset view')}</button></div>
     </section>
     <div className="anatomy-footnote">
-    <a className="model-credit" href="/models/ATTRIBUTION.txt">BodyParts3D / DBCLS / CC BY-SA 2.1 JP</a>
+    <a className="model-credit" href="/models/ATTRIBUTION.txt">{tr("BodyParts3D / DBCLS / CC BY-SA 2.1 JP")}</a>
     <p className="education-note">{t('Educational model — not a diagnosis.')}</p>
     </div>
   </div>

@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem('medisaathi.appearance')==='light'?'light':'dark'}catch{document.documentElement.dataset.theme='dark'}</script>
+    <style>html{background:var(--bg,#061426);color-scheme:dark}html[data-theme=light]{background:var(--bg,#FCFAFF);color-scheme:light}</style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#061426" />
     <meta name="description" content="MediSaathi — a considered space to review prescriptions, understand instructions, and organize your healthcare." />

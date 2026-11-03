@@ -12,15 +12,20 @@ from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .dependencies import AIIntegration, IntegrationError, reader
-from .models import ExplanationRequest, ReviewRequest, RevisionRequest
+from .models import ExplanationRequest, ReviewRequest, RevisionRequest,ResolveMedicineReviewRequest
+from .medicine_review import requirements,VERIFY_FIELDS
 from .sessions import COOKIE, TTL_SECONDS, SessionStore
 from .ocr_metrics import Measurements, elapsed_ms, log_metrics
 from .section_routes import EXTRA_SCOPES, register_section_routes, section_view
 from .strip_routes import register_strip_routes
 from .downstream.scheduling import integration_factory
 from .downstream_routes import register_downstream_routes
+from .confirmed_workflow import register_confirmed_workflow
+from .patient_explanations import register_patient_explanations
 from .prescription_summary import build_summary
 from .team_routes import register_team_routes
+from .accounts.routes import register_accounts
+from .recognition import records_metadata,capabilities
 
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
 
@@ -30,22 +35,31 @@ def fail(status, category, message):
 
 
 def create_app(*, factory=integration_factory, origins=None, session_limit=64, upload_validator=None,
-               enabled_sections=("medicines", "instructions", "investigations", "strip")):
+               enabled_sections=("medicines", "instructions", "investigations", "strip"), accounts=None,recognition_mode=None):
     app = FastAPI(title="MediSaathi local demo API", docs_url=None, redoc_url=None)
     store = SessionStore(factory, limit=session_limit)
     app.state.sessions = store
     app.state.enabled_sections = tuple(enabled_sections)
+    app.state.recognition_mode=recognition_mode or ('gemini' if factory is integration_factory else 'custom_extractor')
+    if app.state.recognition_mode not in ('gemini','offline_fixture','custom_extractor'):raise ValueError('Unknown extraction mode')
     register_section_routes(app,store,enabled_sections)
     register_strip_routes(app,store,enabled_sections)
     register_downstream_routes(app,store,enabled_sections)
+    register_confirmed_workflow(app,store)
+    register_patient_explanations(app,store)
     register_team_routes(app,store,enabled_sections)
+    register_accounts(app,store,enabled_sections,accounts)
     allowed = tuple(origins or os.getenv("MEDISAATHI_ORIGINS", ",".join(DEFAULT_ORIGINS)).split(","))
     if any(origin == "*" for origin in allowed):
         raise ValueError("Explicit frontend origins are required")
     app.add_middleware(CORSMiddleware, allow_origins=list(allowed), allow_credentials=True,
                        allow_methods=["GET", "POST", "PUT", "DELETE"],
-                       allow_headers=["Content-Type", "X-MediSaathi-Action"])
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
+                       allow_headers=["Content-Type", "X-MediSaathi-Action", "X-MediSaathi-Filename"])
+    hosts=os.getenv('MEDISAATHI_TRUSTED_HOSTS','localhost,127.0.0.1,testserver')
+    trusted=[host.strip() for host in hosts.split(',') if host.strip()]
+    if not trusted or any('*' in host or '/' in host or '://' in host or any(c.isspace() for c in host) for host in trusted):
+        raise ValueError('Explicit trusted API hostnames are required')
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=trusted)
 
     @app.middleware("http")
     async def browser_boundary(request, call_next):
@@ -64,6 +78,16 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
     async def validation_error(_request, _error):
         # FastAPI's default error body may echo medical input. Never return it.
         return JSONResponse({"detail": {"category": "invalid_input", "message": "Request fields or types are invalid."}}, 422)
+
+    @app.exception_handler(reader.ImageInputError)
+    async def image_validation_error(_request, _error):
+        # Upload validators run before AIIntegration wraps extraction errors.
+        # Never echo validator input or turn a rejected image into a plain 500.
+        message = ("Offline fixture mode accepts only the registered demo images. Use api/.venv/demo16c/fictional-prescription.png."
+                   if app.state.recognition_mode == 'offline_fixture'
+                   else "Use a valid single-frame PNG/JPEG within the existing image limits.")
+        return JSONResponse({"detail": {"category": "image_validation_error", "message": message}}, 422,
+                            headers={"Cache-Control": "no-store"})
 
     @app.exception_handler(IntegrationError)
     async def integration_error(_request, error):
@@ -96,7 +120,11 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
                 "status": section["status"], "original_records": section["payload"],
                 "records": section["reviewed"], "error": section["safe_error"],
                 "reviewed": session.reviewed, "performance": dict(session.performance),
+                "diagnostic_reference": session.diagnostic_reference if section["status"] == "failed" else None,
+                "source_document": session.prescription_document["metadata"] if session.prescription_document else None,
                 "sections": {scope:section_view(session,snap,scope) for scope in EXTRA_SCOPES if scope in enabled_sections},
+                **records_metadata(section['payload'] or []),
+                "review_requirements":requirements(section['payload'],section['reviewed'] or section['payload']),
                 "confirmed": session.reviewed and session.confirmed_revision == session.revision
                 and "medicines" in snap["confirmed_scopes"]}
 
@@ -111,8 +139,18 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
             configured = False
         return {"status": "ok", "mode": "local-demo", "scopes": list(enabled_sections),
                 "api_contract": "medisaathi-14d", "gemini_configured": configured,
-                "workspace_contract": "restore-summary-v1", "storage": "session-memory", "authentication": "demo-only",
+                "scheduling_review_contract":"pattern-format-review-v1",
+                "named_slot_contract":"confirmed-named-slots-v1",
+                "confirmed_prescription_contract":"single-review-date-only-v1",
+                "clock_scheduling_contract":"confirmed-clock-schedule-v1",
+                "scheduling_eligibility_policy":"confirmed-clinical-fields-v2",
+                "patient_explanation_contract":"selected-source-grounded-v1",
+                "workspace_contract": "restore-summary-v1", "storage": "session-memory", "authentication": "supabase" if app.state.accounts else "demo-only",
+                "account_archive_storage_configured": bool(app.state.accounts and app.state.accounts.repository),
                 "scheduling_contract": "review-approve-v1" if {"medicines", "instructions"}.issubset(enabled_sections) else None}
+
+    @app.get('/api/recognition/capabilities')
+    def recognition_capabilities():return capabilities(app.state.recognition_mode)
 
     @app.post("/api/session")
     def start_session(request: Request):
@@ -159,6 +197,7 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
             session.section_states = {}
             session.prescription_image = None
             session.prescription_mime = None
+            session.prescription_document = None
         return {"status": "cleared"}
 
     @app.post("/api/prescriptions")
@@ -172,23 +211,30 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
             if len(data) + len(chunk) > reader.MAX_IMAGE_BYTES:
                 fail(413, "image_validation_error", "Image exceeds the 10 MiB limit.")
             data.extend(chunk)
-        if request.headers.get("content-type", "").split(";")[0] not in ("image/png", "image/jpeg"):
-            fail(415, "image_validation_error", "Use PNG or JPEG image bytes.")
+        from urllib.parse import unquote
+        from .prescription_documents import prepare,DocumentError,MIMES
+        mime=request.headers.get('content-type','').split(';')[0]
+        filename=unquote(request.headers.get('x-medisaathi-filename',''))
+        if len(filename)>240 or any(ord(c)<32 for c in filename):fail(415,'document_validation_error','Invalid source filename.')
+        if mime not in (*MIMES.values(),'application/octet-stream',''):fail(415,'image_validation_error','Use PNG, JPEG, PDF, DOCX or UTF-8 TXT.')
+        if upload_validator is not None and mime not in ('image/png','image/jpeg'):fail(415,'document_validation_error','Documents require the normal real-analysis server; fixture mode does not simulate document OCR.')
         def accept():
             with session.lock:
                 measurements = Measurements()
                 with measurements.scope():
+                    try:raw_image,document=prepare(bytes(data),mime,filename)
+                    except DocumentError as error:fail(422,error.category,str(error))
                     if upload_validator is not None:
                         upload_validator(bytes(data))
                     session.invalidate()
-                    raw_image = bytes(data)
                     session.prescription_image = None
                     session.ai.start_prescription(raw_image)
                     session.prescription_image = raw_image
+                    session.prescription_document = document
                     session.prescription_active = True
                     session.section_states = {}
                 # Dimensions are read only after authoritative full validation.
-                with Image.open(BytesIO(data)) as image:
+                with Image.open(BytesIO(raw_image)) as image:
                     width, height = image.size
                     session.prescription_mime = "image/png" if image.format == "PNG" else "image/jpeg"
                 session.performance = {"upload_ms": elapsed_ms(started),
@@ -223,14 +269,19 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
             job = session.ai.begin_section("medicines", analysis_id=analysis_id, retry=state == "failed")
             session.performance["analysis_attempts"] = session.performance.get("analysis_attempts", 0) + 1
             adapter = session.ai
+            document_source = session.prescription_document
         # Network calls run outside the session lock so status and replacement
         # uploads remain responsive. The adapter rejects stale job completion.
         started = perf_counter()
         measurements = Measurements()
-        with measurements.scope():
+        from document_input import source_scope
+        from .extraction_diagnostics import scope as diagnostic_scope
+        with measurements.scope(),source_scope(document_source),diagnostic_scope('medicines') as diagnostic_reference:
             adapter.execute(job)
         with session.lock:
             current(session, analysis_id)
+            failed=session.ai.snapshot()["prescription"]["sections"]["medicines"]["status"] == "failed"
+            session.diagnostic_reference=diagnostic_reference if failed else None
             measured = measurements.snapshot()
             session.performance["total_gemini_sdk_invocations"] = session.performance.get("total_gemini_sdk_invocations", 0) + measured["gemini_sdk_invocations"]
             session.performance.update(measured)
@@ -251,12 +302,40 @@ def create_app(*, factory=integration_factory, origins=None, session_limit=64, u
     def review(analysis_id: str, body: ReviewRequest, request: Request):
         session = session_for(request)
         with session.lock:
-            current(session, analysis_id, body.revision)
+            root=current(session, analysis_id, body.revision)
+            original=root['sections']['medicines']['payload'] or []
+            prior=root['sections']['medicines']['reviewed'] or original
             # Invalidate BEFORE validation too; forged data cannot retain an API
             # confirmation or previously derived explanation.
             session.invalidate()
+            for index,record in enumerate(body.records):
+                if index<len(original) and record.get('confidence')!=original[index]['confidence']:
+                    fail(422,'unresolved_review','Original confidence cannot be edited or invented.')
+                if record.get('needs_review') is False and (index>=len(prior) or prior[index]['needs_review'] is not False):
+                    fail(422,'unresolved_review','Use explicit per-field review resolution; unresolved flags cannot be cleared by a record payload.')
+                if index<len(original) and original[index]['needs_review'] is True and record.get('needs_review') is False and any(record.get(f)!=prior[index].get(f) for f in VERIFY_FIELDS):
+                    fail(422,'review_required','Edited resolved records require a new explicit field review.')
             session.ai.review("medicines", body.records)
             session.reviewed = True
+            return view(session)
+
+    @app.post('/api/prescriptions/{analysis_id}/review/resolve')
+    def resolve_review(analysis_id:str,body:ResolveMedicineReviewRequest,request:Request):
+        session=session_for(request)
+        with session.lock:
+            root=current(session,analysis_id,body.revision)
+            if not session.reviewed:fail(409,'review_required','Save the current review before resolving any flag.')
+            section=root['sections']['medicines'];records=section['reviewed']
+            details=requirements(section['payload'],records)
+            if body.record_index>=len(details) or set(body.verified_fields)!=set(VERIFY_FIELDS) or len(set(body.verified_fields))!=len(VERIFY_FIELDS):fail(422,'invalid_input','Verify every required source field.')
+            if not details[body.record_index]['flagged']:fail(409,'invalid_state','This record has no unresolved review flag.')
+            if not details[body.record_index]['can_resolve']:fail(422,'unresolved_review','Missing, low-confidence or unsupported fields remain unresolved. Do not guess them.')
+            # This explicit record-review action never changes original OCR or
+            # confidence. It uses the existing strict AI review contract, revokes
+            # prior approvals, and requires an independent new confirmation.
+            import copy
+            updated=copy.deepcopy(records);updated[body.record_index]['needs_review']=False
+            session.invalidate();session.ai.review('medicines',updated);session.reviewed=True
             return view(session)
 
     @app.post("/api/prescriptions/{analysis_id}/confirm")

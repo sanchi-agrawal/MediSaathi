@@ -1,0 +1,18 @@
+export const reviewRequirementsHindi:Record<string,string>={
+ 'What still needs review?':'किन जानकारियों की जाँच बाकी है?',
+ 'Field-level review diagnostics are unavailable. Restart the current API before resolving review flags.':'हर जानकारी की जाँच का विवरण उपलब्ध नहीं है। जाँच पूरी करने से पहले वर्तमान API फिर शुरू करें।',
+ 'User review resolved. The original OCR flag is retained.':'उपयोगकर्ता की जाँच पूरी हुई। मूल OCR चेतावनी सुरक्षित रखी गई है।',
+ 'No unresolved medicine review flag.':'दवा रिकॉर्ड में कोई अनसुलझी जाँच चेतावनी नहीं है।',
+ 'This record remains flagged. Confirmation alone does not clear unresolved information.':'इस रिकॉर्ड की जाँच अभी बाकी है। केवल पुष्टि करने से अधूरी जानकारी पूरी नहीं होती।',
+ 'Missing fields':'अधूरी जानकारियाँ',
+ 'Values to verify against the source':'मूल पर्चे से मिलाकर जाँची जाने वाली जानकारियाँ',
+ 'Original confidence is unknown and cannot be invented.':'मूल विश्वास स्तर अज्ञात है और अनुमान से नहीं जोड़ा जा सकता।',
+ 'Original confidence is below the existing review threshold.':'मूल विश्वास स्तर मौजूदा जाँच सीमा से कम है।',
+ 'Original confidence meets the existing threshold; it is not proof of medical accuracy.':'मूल विश्वास स्तर मौजूदा सीमा पूरी करता है; यह चिकित्सकीय शुद्धता का प्रमाण नहीं है।',
+ 'Do not guess missing values or change confidence. Leave unresolved flags in place when the source cannot resolve them.':'अधूरी जानकारी का अनुमान न लगाएँ और विश्वास स्तर न बदलें। मूल पर्चे से जानकारी स्पष्ट न हो तो चेतावनी बनी रहने दें।',
+ 'Verify every listed clinical field against the image. Resolving this saved review revokes confirmation, links and schedules; confirm again afterward.':'हर दी गई जानकारी को तस्वीर से मिलाकर जाँचें। यह जाँच पूरी करने पर पुरानी पुष्टि, संबंध और समय-सारणियाँ हटेंगे; इसके बाद फिर पुष्टि करें।',
+ 'Verify {0} for medicine {1}':'दवा {1} की {0} जाँचें',
+ 'Resolve this verified medicine review':'इस सत्यापित दवा की जाँच पूरी करें',
+ 'Resolving review':'जाँच पूरी की जा रही है',
+ 'Restart the current API before resolving review flags.':'जाँच चेतावनियाँ पूरी करने से पहले वर्तमान API फिर शुरू करें।',
+}

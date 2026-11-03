@@ -1,10 +1,11 @@
 import type { InstructionEnvelope, InvestigationEnvelope } from './api'
 import { ApiError } from './prescriptions'
 import { invalidateSchedulingView } from './workflowEvents'
+import type { RecognitionMetadata } from './recognition'
 
 export type ExtraScope='instructions'|'investigations'
 export type ExtraPayload=InstructionEnvelope|InvestigationEnvelope
-export interface SectionSnapshot {
+export interface SectionSnapshot extends RecognitionMetadata {
   analysis_id:string; scope:ExtraScope; revision:string
   status:'not_requested'|'running'|'succeeded'|'failed'
   original_payload:ExtraPayload|null; payload:ExtraPayload|null

@@ -5,10 +5,13 @@ from datetime import date
 from fastapi import HTTPException, Request
 from pydantic import ValidationError
 from .dependencies import IntegrationError
-from .downstream.models import AssociationRequest, Binding, LinkedRequest, PlanRequest, DerivedSchedule
+from .downstream.models import AssociationRequest, Binding, LinkedRequest, PlanRequest, DerivedSchedule,SlotsConfirmationRequest
 from .downstream.scheduling import validate_public_result
 from .section_routes import metadata
 from .sessions import COOKIE
+from .downstream.automatic import prepare
+from .downstream.association_proposals import proposals
+from .clock_scheduling import register_clock_scheduling
 
 def reject(status, category, message):
     raise HTTPException(status, detail={"category": category, "message": message})
@@ -41,23 +44,64 @@ def register_downstream_routes(app, store, enabled_sections):
     def view(session):
         root, ins, ready = context(session)
         state = session.scheduling_state if ready else {}
+        # Clock courses have their own response contract. Keep the restored
+        # review/association client's legacy four-slot plan contract intact.
+        clock_course=bool(state.get('clock_course'))
         return {"analysis_id": root["analysis_id"], "medicine_revision": session.revision,
                 "instruction_revision": ins["revision"], "scheduling_revision": session.scheduling_revision,
-                "ready": ready, "status": state.get("status", "ready" if ready else "blocked"),
+                "ready": ready, "status": 'associated' if clock_course else state.get("status", "ready" if ready else "blocked"),"timing_contract":"confirmed-named-slots-v1",
                 "medicines": root["sections"]["medicines"]["reviewed"] or [],
                 "instructions": (root["sections"]["instructions"]["reviewed"] or {}).get("instructions", []),
                 "instruction_issues": (root["sections"]["instructions"]["reviewed"] or {}).get("issues", []),
-                "association": copy.deepcopy(state.get("association")), "plan": copy.deepcopy(state.get("plan")),
-                "result": copy.deepcopy(state.get("result")), "error": copy.deepcopy(state.get("error"))}
+                "association": copy.deepcopy(state.get("association")), "plan": None if clock_course else copy.deepcopy(state.get("plan")),
+                "result": None if clock_course else copy.deepcopy(state.get("result")), "error": copy.deepcopy(state.get("error")),
+                "associations": copy.deepcopy(state.get('associations', [state['association']] if state.get('association') else [])),
+                "automatic": prepare(session, root['sections']['medicines']['reviewed'] or [],
+                    (root['sections']['instructions']['reviewed'] or {}).get('instructions',[]),
+                    state.get('associations',[state['association']] if state.get('association') else [])) if ready else [],
+                "course_results": [] if clock_course else copy.deepcopy(state.get('course_results',[])),
+                "instruction_state":{"status":root['sections']['instructions']['status'],
+                    "reviewed":ins['reviewed'],"confirmed":ins['confirmed_revision']==ins['revision'] and 'instructions' in session.ai.snapshot()['confirmed_scopes']},
+                "association_proposals":proposals(root['sections']['medicines']['reviewed'] or [],
+                    (root['sections']['instructions']['reviewed'] or {}).get('instructions',[]),
+                    state.get('associations',[])) if ready else []}
 
     def linked(session, analysis_id, body):
         context(session, analysis_id, body, require=True)
-        association = session.scheduling_state.get("association")
-        if not association or association["association_id"] != body.association_id:
+        state=session.scheduling_state
+        association = next((a for a in state.get('associations',[state['association']] if state.get('association') else []) if a['association_id']==body.association_id),None)
+        if not association:
             reject(409, "association_required", "Explicitly associate the current medicine and instruction first.")
         return association
 
     prefix = "/api/prescriptions/{analysis_id}"
+    register_clock_scheduling(app,load,context,reject)
+
+    @app.post(prefix+'/schedule/slots/confirm')
+    def confirm_slots(analysis_id:str,body:SlotsConfirmationRequest,request:Request):
+        session=load(request)
+        with session.lock:
+            association=linked(session,analysis_id,body)
+            if session.ai.confirmed_named_slots(association['association_id'])==body.slots:return view(session)
+            event=session.ai.frontend_events().register_slot_confirmation(association['association_id'],body.slots)
+            session.ai.confirm_named_slots(association['association_id'],body.slots,event=event)
+            state=session.scheduling_state
+            state.update(status='associated',association=association,plan=None,result=None,course_results=[])
+            session.scheduling_revision=secrets.token_urlsafe(24)
+            return view(session)
+
+    @app.post(prefix+'/schedule/notation/confirm')
+    def confirm_notation(analysis_id:str,body:LinkedRequest,request:Request):
+        session=load(request)
+        with session.lock:
+            association=linked(session,analysis_id,body)
+            event=session.ai.frontend_events().register_notation_confirmation(association['association_id'])
+            session.ai.confirm_three_slot_notation(association['association_id'],event=event)
+            state=session.scheduling_state
+            state['notation_confirmed']=list(set(state.get('notation_confirmed',[])+[association['association_id']]))
+            state.update(status='associated',association=association,plan=None,result=None,course_results=[])
+            session.scheduling_revision=secrets.token_urlsafe(24)
+            return view(session)
 
     @app.get("/api/scheduling/current")
     def status(request: Request):
@@ -70,11 +114,18 @@ def register_downstream_routes(app, store, enabled_sections):
         session = load(request)
         with session.lock:
             context(session, analysis_id, body, require=True)
-            session.invalidate_scheduling()
+            prior=session.scheduling_state.get('associations',[])
+            if any(a['medicine_ref']==body.medicine_ref and a['instruction_id']==body.instruction_id for a in prior):
+                reject(409,'association_exists','This pair is already confirmed. Refresh the confirmed links.')
+            if any(a['medicine_ref']==body.medicine_ref or a['instruction_id']==body.instruction_id for a in prior):
+                reject(409,'association_conflict','A selected record already has a confirmed link. Explicitly clear links before correcting it.')
             event = session.ai.frontend_events().register_association(body.medicine_ref, body.instruction_id)
             identity = session.ai.associate(body.medicine_ref, body.instruction_id, event=event)
-            session.scheduling_state = {"status": "associated", "association": {
-                "association_id": identity, "medicine_ref": body.medicine_ref, "instruction_id": body.instruction_id}}
+            association={"association_id": identity, "medicine_ref": body.medicine_ref, "instruction_id": body.instruction_id}
+            session.scheduling_revision=secrets.token_urlsafe(24)
+            session.scheduling_state = {"status": "associated", "association": association,
+                "notation_confirmed":session.scheduling_state.get('notation_confirmed',[]),
+                "associations":[a for a in prior if a['medicine_ref']!=body.medicine_ref and a['instruction_id']!=body.instruction_id]+[association]}
             return view(session)
 
     @app.delete(prefix + "/associations")
@@ -90,7 +141,8 @@ def register_downstream_routes(app, store, enabled_sections):
         session = load(request)
         with session.lock:
             association = linked(session, analysis_id, body)
-            session.scheduling_state = {"status": "associated", "association": association}
+            session.scheduling_state = {"status": "associated", "association": association,
+                "associations":session.scheduling_state.get('associations',[association]),"notation_confirmed":session.scheduling_state.get('notation_confirmed',[])}
             session.scheduling_revision = secrets.token_urlsafe(24)
             return view(session)
 
@@ -99,7 +151,12 @@ def register_downstream_routes(app, store, enabled_sections):
         session = load(request)
         with session.lock:
             association = linked(session, analysis_id, body)
-            session.scheduling_state = {"status": "associated", "association": association}
+            previous=session.scheduling_state
+            same_start=not previous.get('plan') or previous['plan']['start_date']==body.plan.start_date
+            session.scheduling_state = {"status": "associated", "association": association,
+                "notation_confirmed":previous.get('notation_confirmed',[]),
+                "associations":previous.get('associations',[association]),
+                "course_results":[r for r in previous.get('course_results',[]) if same_start and r['association']['association_id']!=association['association_id']]}
             session.scheduling_revision = secrets.token_urlsafe(24)
             try:
                 if date.fromisoformat(body.plan.start_date).isoformat() != body.plan.start_date:
@@ -115,6 +172,8 @@ def register_downstream_routes(app, store, enabled_sections):
         with session.lock:
             association = linked(session, analysis_id, body)
             state = session.scheduling_state
+            if state.get('association',{}).get('association_id')!=association['association_id']:
+                reject(409,'stale_result','Review this association before approving it.')
             if state.get("status") != "reviewed" or not state.get("plan"):
                 reject(409, "approval_required", "Save a plan before separately approving generation.")
             plan = copy.deepcopy(state["plan"])
@@ -136,4 +195,6 @@ def register_downstream_routes(app, store, enabled_sections):
                 session.scheduling_state = {"status": "failed", "error": {"category": "invalid_response", "message": "Scheduler output was invalid. No schedule is available."}}
                 reject(502, "invalid_response", "Scheduler output was invalid. No schedule is available.")
             state.update(status="succeeded" if result["payload"]["status"] == "ok" else "needs_input", result=result, error=None)
+            if result['payload']['status']=='ok':
+                state.setdefault('course_results',[]).append({'association':association,'plan':plan,'result':result})
             return view(session)

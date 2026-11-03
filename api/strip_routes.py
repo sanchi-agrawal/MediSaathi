@@ -12,6 +12,7 @@ from .models import RevisionRequest, StripReviewRequest
 from .sessions import COOKIE
 from .ocr_metrics import Measurements, elapsed_ms
 import strip
+from .expiry_status import expiry_status
 
 
 def reject(status,category,message):
@@ -49,7 +50,9 @@ def register_strip_routes(app,store,enabled_sections):
                 "confirmed":state["reviewed"] and state["confirmed_revision"]==state["revision"]
                     and "strip" in snap["confirmed_scopes"],
                 "extractor_invocations":section["extractor_invocations"],
-                "performance":dict(state.get("performance",{}))}
+                "performance":dict(state.get("performance",{})),
+                "recognition_mode":app.state.recognition_mode,
+                "expiry_status":expiry_status(section['reviewed'],state['reviewed'] and state['confirmed_revision']==state['revision'] and 'strip' in snap['confirmed_scopes'])}
 
     @app.post("/api/strips")
     async def upload(request:Request):

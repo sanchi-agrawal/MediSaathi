@@ -8,6 +8,7 @@ from fastapi import HTTPException, Request
 from .models import RevisionRequest, SectionReviewRequest
 from .ocr_metrics import Measurements, elapsed_ms
 from .sessions import COOKIE
+from .recognition import records_metadata
 
 ExtraScope = Literal["instructions", "investigations"]
 EXTRA_SCOPES = ("instructions", "investigations")
@@ -40,7 +41,8 @@ def section_view(session, snap, scope):
             "reviewed":state["reviewed"],"confirmed":state["reviewed"]
             and state["confirmed_revision"]==state["revision"] and scope in snap["confirmed_scopes"],
             "extractor_invocations":section["extractor_invocations"],
-            "performance":dict(state["performance"])}
+            "performance":dict(state["performance"]),
+            **records_metadata((section['payload'] or {}).get(scope,[]))}
 
 
 def register_section_routes(app, store, enabled_sections):
@@ -85,8 +87,11 @@ def register_section_routes(app, store, enabled_sections):
                 session.invalidate_scheduling()
             job=session.ai.begin_section(scope,analysis_id=analysis_id,retry=status=="failed")
             adapter=session.ai
+            document_source=session.prescription_document
         started=perf_counter();measurements=Measurements()
-        with measurements.scope():
+        from document_input import source_scope
+        from .extraction_diagnostics import scope as diagnostic_scope
+        with measurements.scope(), source_scope(document_source),diagnostic_scope(scope):
             adapter.execute(job)
         with session.lock:
             snap,state=current(session,analysis_id,scope)

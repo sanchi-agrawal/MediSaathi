@@ -12,6 +12,7 @@ from .dependencies import AIIntegration,reader
 from .main import create_app
 from .downstream.scheduling import schedule_handoff
 import strip
+from .offline_languages import lookup as language_fixture,extract as language_extract
 
 def forbidden(*a,**kw):raise RuntimeError('Provider access disabled in offline fictional demo')
 reader.genai.Client=forbidden
@@ -31,16 +32,22 @@ MED=dict(raw_text='FICTIONAL: Dolo 650 take 1 tablet BD morning and night for 3 
     timing='morning and night',confidence=None,needs_review=False)
 def check(data,expected=PRESCRIPTION):
     if hashlib.sha256(data).digest()!=hashlib.sha256(expected).digest():
+        if expected is PRESCRIPTION and language_fixture(data) is not None:return
         raise reader.ImageInputError('Use the registered fictional fixture for the offline demo.')
-def medicine(data):check(data);return [copy.deepcopy(MED)]
+def medicine(data):
+    check(data)
+    if language_fixture(data):return language_extract(data,'medicines')
+    return [copy.deepcopy(MED)]
 def instructions(data):
     check(data)
+    if language_fixture(data):return language_extract(data,'instructions')
     return dict(schema_version='medication-instructions-v1',source_image_sha256=hashlib.sha256(data).hexdigest(),
         instructions=[dict(instruction_id='instruction_001',medicine_name_raw='Dolo 650',raw_text=MED['raw_text'],
             dose_quantity_raw='1',dose_unit_raw='tablet',frequency_raw='BD',route_raw=None,timing_raw='morning and night',
             duration_raw='3 days',uncertainty_reasons=[],needs_review=False,confirmation_required=True)],issues=[],confirmation_required=True)
 def investigations(data):
     check(data)
+    if language_fixture(data):return language_extract(data,'investigations')
     return dict(schema_version='prescribed-investigations-v1',source_image_sha256=hashlib.sha256(data).hexdigest(),
         investigations=[dict(investigation_id='investigation_001',raw_text='FICTIONAL: CBC test ordered',test_name_raw='CBC test',
             specimen_raw=None,variant_raw=None,timing_raw=None,order_context_raw='ordered',
@@ -51,7 +58,7 @@ def expiry(data):
         date_observations=[dict(raw_label='EXP',raw_date_text='08/2027',raw_text='EXP 08/2027',association='same_product',confidence=None,uncertain=False)],
         quality_issues=[],confidence=None,uncertain=False))
 def factory():return AIIntegration(extractors={'medicines':medicine,'instructions':instructions,'investigations':investigations,'strip':expiry},downstream={'schedule':schedule_handoff})
-inner=create_app(factory=factory,upload_validator=check,origins=('http://localhost:5175','http://127.0.0.1:5175'))
+inner=create_app(factory=factory,upload_validator=check,origins=('http://localhost:5175','http://127.0.0.1:5175'),accounts=False,recognition_mode='offline_fixture')
 @inner.get('/api/demo-info')
 def info():return {'mode':'offline-fictional','gemini_enabled':False,'notifications_enabled':False}
 

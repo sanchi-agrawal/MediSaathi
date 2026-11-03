@@ -5,6 +5,8 @@ import userEvent from '@testing-library/user-event'
 import PrescriptionFlow from './PrescriptionFlow'
 import type { ExtraPayload,ExtraScope,SectionClient,SectionSnapshot } from '../lib/sections'
 import type { AnalysisSnapshot,PrescriptionClient } from '../lib/prescriptions'
+import {schedulingClient} from '../lib/scheduling'
+import type {ScheduleContext} from '../lib/scheduling'
 
 vi.mock('../lib/image',()=>({validateImage:vi.fn(async()=>({width:4,height:4}))}))
 const imageHash='a'.repeat(64)
@@ -35,88 +37,58 @@ function clients(){
     confirm:vi.fn(async s=>({...s,confirmed:true}))}
   return {client,sections}
 }
+
 async function start(){
   const api=clients();render(<PrescriptionFlow {...api}/>);const user=userEvent.setup()
-  await user.click(screen.getByRole('checkbox',{name:/Dosage instructions/}))
-  await user.click(screen.getByRole('checkbox',{name:/Prescribed investigations/}))
+  expect((screen.getByRole('checkbox',{name:/Dosage instructions/}) as HTMLInputElement).checked).toBe(true)
+  expect(screen.queryByText('Prescribed investigations')).toBeNull()
+  expect(screen.queryByText('Strip expiry')).toBeNull()
   await user.upload(screen.getByLabelText('Upload Prescription image'),new File(['fictional'],'fictional.png',{type:'image/png'}))
   await screen.findByAltText('Prescription image selected for your review')
   return {...api,user}
 }
 beforeEach(()=>{URL.createObjectURL=vi.fn(()=>'blob:fictional');URL.revokeObjectURL=vi.fn()})
+it('reloads association readiness after instruction confirmation even when the revision stays the same',async()=>{
+ const api=clients();const instruction={...state('instructions',true),reviewed:true,confirmed:false}
+ vi.mocked(api.client.current).mockResolvedValue({...medicine,status:'succeeded',records:[],original_records:[],reviewed:true,confirmed:true,sections:{instructions:instruction}})
+ const context:ScheduleContext={analysis_id:'a',medicine_revision:'m-r',instruction_revision:instruction.revision,scheduling_revision:'s',ready:false,status:'blocked',medicines:[],instructions:[],instruction_issues:[],association:null,plan:null,result:null,error:null,instruction_state:{status:'succeeded',reviewed:true,confirmed:false}}
+ const current=vi.spyOn(schedulingClient,'current').mockResolvedValue(context)
+ render(<PrescriptionFlow {...api}/>);await screen.findByText('Save and confirm the extracted dosage instructions before preparing links.')
+ current.mockResolvedValue({...context,ready:true,status:'ready',instruction_state:{status:'succeeded',reviewed:true,confirmed:true}})
+ const panel=within(screen.getByRole('region',{name:'Dosage instructions review'}));const user=userEvent.setup()
+ await user.click(panel.getByRole('checkbox'));await user.click(panel.getByRole('button',{name:'Confirm dosage instructions'}))
+ await screen.findByText('Choose or correct a medicine–instruction link');expect(current).toHaveBeenCalledTimes(2)
+ expect(vi.mocked(api.sections.confirm).mock.calls[0][0].revision).toBe(instruction.revision)
+})
 afterEach(()=>{cleanup();vi.restoreAllMocks()})
-describe('separate real extraction sections with offline clients',()=>{
-  it('section checkboxes do not extract automatically; one click extracts only selected sections',async()=>{
-    const {user,client,sections}=await start()
-    expect(sections.analyze).not.toHaveBeenCalled()
-    await user.click(screen.getByRole('checkbox',{name:/^Medicines/}))
-    await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
-    await screen.findByRole('region',{name:'Prescribed investigations review'})
-    expect(client.analyze).not.toHaveBeenCalled()
-    expect(sections.analyze).toHaveBeenCalledTimes(2)
-    expect(screen.getByLabelText('Dosage instructions: Dose quantity as written 1').getAttribute('value')).toBe('')
-    expect(screen.getByText(/ambiguous_dose/)).toBeTruthy()
-    expect(screen.getByText(/variant_unclear/)).toBeTruthy()
-  })
-  it('saves/confirms independently and immediately invalidates a corrected section',async()=>{
-    const {user,client,sections}=await start()
-    await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
-    const panel=within(await screen.findByRole('region',{name:'Dosage instructions review'}))
-    await user.click(panel.getByRole('button',{name:'Save dosage instructions review'}))
-    await waitFor(()=>expect((panel.getByRole('checkbox') as HTMLInputElement).disabled).toBe(false))
-    await user.click(panel.getByRole('checkbox'))
-    await user.click(panel.getByRole('button',{name:'Confirm dosage instructions'}))
-    await panel.findByRole('button',{name:'Confirmed by server'})
-    expect(client.confirm).not.toHaveBeenCalled()
-    const inv=within(screen.getByRole('region',{name:'Prescribed investigations review'}))
-    expect((inv.getByRole('button',{name:'Confirm prescribed investigations'}) as HTMLButtonElement).disabled).toBe(true)
-    fireEvent.change(panel.getByLabelText('Dosage instructions: Medicine name as written 1'),{target:{value:'Corrected fictional name'}})
-    expect(panel.queryByRole('button',{name:'Confirmed by server'})).toBeNull()
-    await waitFor(()=>expect(sections.invalidate).toHaveBeenCalledTimes(1))
-    expect(panel.getByLabelText('Dosage instructions: Medicine name as written 1').getAttribute('value')).toBe('Corrected fictional name')
-    expect(panel.getByText(/ambiguous_dose/)).toBeTruthy()
-  })
-  it('preserves successes on partial failure and retries only the failed scope',async()=>{
-    const {user,client,sections}=await start()
-    sections.analyze=vi.fn(async s=>s.scope==='investigations'?{...state(s.scope),status:'failed' as const,error:{category:'network_error',message:'Offline test failure'}}:state(s.scope,true))
-    await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
-    await screen.findByText('Prescribed investigations extraction failed.')
-    expect(screen.getByText(/Partial results: completed sections/)).toBeTruthy()
-    const medCalls=vi.mocked(client.analyze).mock.calls.length
-    sections.analyze=vi.fn(async s=>state(s.scope,true))
-    await user.click(screen.getByRole('button',{name:'Retry prescribed investigations'}))
-    await waitFor(()=>expect(sections.analyze).toHaveBeenCalledTimes(1))
-    expect(vi.mocked(sections.analyze).mock.calls[0][0].scope).toBe('investigations')
-    expect(client.analyze).toHaveBeenCalledTimes(medCalls)
-    expect(screen.getByLabelText('Dosage instructions: Dose quantity as written 1')).toBeTruthy()
-  })
-  it('stops sequential calls on quota/configuration failure without erasing medicines',async()=>{
-    const {user,client,sections}=await start()
-    sections.analyze=vi.fn(async s=>({...state(s.scope),status:'failed' as const,error:{category:'quota_or_rate_limit',message:'Offline quota test'}}))
-    await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
-    await screen.findByText(/Extraction stopped after a configuration\/quota failure/)
-    expect(client.analyze).toHaveBeenCalledTimes(1)
-    expect(sections.analyze).toHaveBeenCalledTimes(1)
-    expect(screen.getByText(/Extraction succeeded with zero medicines/)).toBeTruthy()
-  })
-  it('image removal clears all section approvals/results without new extraction',async()=>{
-    const {user,sections,client}=await start()
-    await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
-    await screen.findByRole('region',{name:'Prescribed investigations review'})
-    await user.click(screen.getByRole('button',{name:'Remove image'}))
-    expect(screen.queryByRole('region',{name:'Dosage instructions review'})).toBeNull()
-    expect(screen.queryByRole('region',{name:'Prescribed investigations review'})).toBeNull()
-    await waitFor(()=>expect(client.clear).toHaveBeenCalledTimes(1))
-    expect(sections.analyze).toHaveBeenCalledTimes(2)
-  })
-  it('ignores section responses arriving after source removal',async()=>{
-    const {user,sections}=await start();let finish!:(s:SectionSnapshot)=>void
-    sections.analyze=vi.fn(()=>new Promise<SectionSnapshot>(resolve=>{finish=resolve}))
-    await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
-    await waitFor(()=>expect(sections.analyze).toHaveBeenCalledTimes(1))
-    await user.click(screen.getByRole('button',{name:'Remove image'}))
-    finish(state('instructions',true))
-    await waitFor(()=>expect(screen.queryByRole('region',{name:'Dosage instructions review'})).toBeNull())
-    expect(sections.analyze).toHaveBeenCalledTimes(1)
-  })
+describe('medicine and instruction extraction only',()=>{
+ it('extracts selected instructions explicitly, with no investigation or strip UI',async()=>{
+  const {user,client,sections}=await start();expect(sections.analyze).not.toHaveBeenCalled()
+  await user.click(screen.getByRole('checkbox',{name:/^Medicines/}));await user.click(screen.getByRole('button',{name:'Analyze Prescription with AI'}))
+  await screen.findByRole('region',{name:'Dosage instructions review'})
+  expect(client.analyze).not.toHaveBeenCalled();expect(sections.analyze).toHaveBeenCalledTimes(1)
+  expect(vi.mocked(sections.analyze).mock.calls[0][0].scope).toBe('instructions')
+  expect(screen.queryByRole('region',{name:'Prescribed investigations review'})).toBeNull()
+ })
+ it('saves and confirms instructions independently and invalidates edits',async()=>{
+  const {user,client,sections}=await start();await user.click(screen.getByRole('button',{name:'Analyze Prescription with AI'}))
+  const panel=within(await screen.findByRole('region',{name:'Dosage instructions review'}))
+  await user.click(panel.getByRole('button',{name:'Save dosage instructions review'}));await waitFor(()=>expect((panel.getByRole('checkbox') as HTMLInputElement).disabled).toBe(false))
+  await user.click(panel.getByRole('checkbox'));await user.click(panel.getByRole('button',{name:'Confirm dosage instructions'}));await panel.findByRole('button',{name:'Confirmed by server'})
+  expect(client.confirm).not.toHaveBeenCalled()
+  fireEvent.change(panel.getByLabelText('Dosage instructions: Medicine name as written 1'),{target:{value:'Corrected fictional name'}})
+  await waitFor(()=>expect(sections.invalidate).toHaveBeenCalledTimes(1));expect(panel.queryByRole('button',{name:'Confirmed by server'})).toBeNull()
+ })
+ it('keeps successful medicines after instruction failure and retries only instructions',async()=>{
+  const {user,client,sections}=await start();sections.analyze=vi.fn(async s=>({...state(s.scope),status:'failed' as const,error:{category:'network_error',message:'Offline failure'}}))
+  await user.click(screen.getByRole('button',{name:'Analyze Prescription with AI'}));await screen.findByText('Dosage instructions extraction failed.')
+  expect(screen.getByText(/Partial results: completed sections/)).toBeTruthy();const count=vi.mocked(client.analyze).mock.calls.length
+  sections.analyze=vi.fn(async s=>state(s.scope,true));await user.click(screen.getByRole('button',{name:'Retry dosage instructions'}))
+  await waitFor(()=>expect(sections.analyze).toHaveBeenCalledTimes(1));expect(client.analyze).toHaveBeenCalledTimes(count)
+ })
+ it('does not expose restored investigation records or their failures',async()=>{
+  const api=clients();vi.mocked(api.client.current).mockResolvedValue({...medicine,sections:{instructions:state('instructions',true),investigations:{...state('investigations'),status:'failed',error:{category:'api_error',message:'Hidden legacy failure'}}}})
+  render(<PrescriptionFlow {...api}/>);await screen.findByRole('region',{name:'Dosage instructions review'})
+  expect(screen.queryByText('Prescribed investigations')).toBeNull();expect(screen.queryByText(/Hidden legacy failure/)).toBeNull();expect(api.sections.analyze).not.toHaveBeenCalled()
+ })
 })

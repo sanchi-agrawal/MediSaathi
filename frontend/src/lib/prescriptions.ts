@@ -1,13 +1,18 @@
 import type { Language, MedicineRecord } from './api'
 import { invalidateSchedulingView } from './workflowEvents'
 import type { ExtraScope,SectionSnapshot } from './sections'
+import type { RecognitionMetadata } from './recognition'
 
 export const MEDICINE_FIELDS = ['raw_text','name','salt','strength','form','frequency_pattern','duration_days','timing','confidence','needs_review'] as const
-export interface AnalysisSnapshot {
+export interface MedicineReviewRequirement{record_index:number;flagged:boolean;source_flagged:boolean|null;missing_fields:string[];unsupported_fields:string[];confidence_state:'unknown'|'low'|'acceptable';can_resolve:boolean;required_verifications:string[]}
+export interface AnalysisSnapshot extends RecognitionMetadata {
+  source_document?:{kind:string;filename:string;page_count:number|null}|null
+  review_requirements?:MedicineReviewRequirement[]
   analysis_id: string; revision: string
   status: 'not_requested' | 'running' | 'succeeded' | 'failed'
   original_records: MedicineRecord[] | null; records: MedicineRecord[] | null
   error: { category: string; message: string } | null
+  diagnostic_reference?: string | null
   reviewed: boolean; confirmed: boolean
   performance?: Record<string,number>
   sections?: Partial<Record<ExtraScope,SectionSnapshot>>
@@ -38,6 +43,7 @@ export function isMedicine(value:unknown):value is MedicineRecord {
 function parseSnapshot(value:unknown):AnalysisSnapshot {
   if(!value || typeof value!=='object')throw new ApiError('invalid_response','The API returned an invalid analysis.')
   const v=value as AnalysisSnapshot
+  if(v.review_requirements!==undefined&&(!Array.isArray(v.review_requirements)||!v.review_requirements.every(r=>Number.isInteger(r.record_index)&&r.record_index>=0&&typeof r.flagged==='boolean'&&(r.source_flagged===null||typeof r.source_flagged==='boolean')&&typeof r.can_resolve==='boolean'&&['unknown','low','acceptable'].includes(r.confidence_state)&&[r.missing_fields,r.unsupported_fields,r.required_verifications].every(a=>Array.isArray(a)&&a.every(f=>(MEDICINE_FIELDS as readonly string[]).includes(f))))))throw new ApiError('invalid_response','Invalid medicine review diagnostics.')
   if(v.performance!==undefined && (!v.performance || typeof v.performance!=='object' || Array.isArray(v.performance) || !Object.values(v.performance).every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0)))throw new ApiError('invalid_response','Invalid performance metadata.')
   if(typeof v.analysis_id!=='string'||typeof v.revision!=='string'||!['not_requested','running','succeeded','failed'].includes(v.status)||typeof v.reviewed!=='boolean'||typeof v.confirmed!=='boolean'||
     ![v.records,v.original_records].every(records=>records===null||(Array.isArray(records)&&records.every(isMedicine)))||
@@ -57,7 +63,7 @@ export function createPrescriptionClient(fetcher:typeof fetch=(...args)=>fetch(.
     if(method!=='GET'&&path.startsWith('/prescriptions')&&!path.endsWith('/confirm')&&!path.endsWith('/explanation'))invalidateSchedulingView()
     let response:Response
     try {response=await fetcher(`/api${path}`,{method,credentials:'include',cache:'no-store',signal,
-      headers:{'X-MediSaathi-Action':'review',...(body instanceof File?{'Content-Type':body.type||'image/png'}:body!==undefined?{'Content-Type':'application/json'}:{})},
+      headers:{'X-MediSaathi-Action':'review',...(body instanceof File?{'Content-Type':body.type||'application/octet-stream','X-MediSaathi-Filename':encodeURIComponent(body.name)}:body!==undefined?{'Content-Type':'application/json'}:{})},
       body:body instanceof File?body:body===undefined?undefined:JSON.stringify(body)})}
     catch(error){if(error instanceof DOMException&&error.name==='AbortError')throw error;throw new ApiError('network_error','Could not reach the local Python API. Check that it is running.')}
     let payload:unknown
@@ -80,6 +86,7 @@ export function createPrescriptionClient(fetcher:typeof fetch=(...args)=>fetch(.
     async status(data:AnalysisSnapshot,signal?:AbortSignal){return parseSnapshot(await request(path(data),'GET',undefined,signal))},
     async invalidate(data:AnalysisSnapshot){return parseSnapshot(await request(`${path(data)}/invalidate`,'POST',{revision:data.revision}))},
     async review(data:AnalysisSnapshot,records:MedicineRecord[]){if(!records.every(isMedicine))throw new ApiError('invalid_input','Check medicine field types. Blank text must be unknown.');return parseSnapshot(await request(`${path(data)}/review`,'PUT',{revision:data.revision,records}))},
+    async resolveReview(data:AnalysisSnapshot,record_index:number,verified_fields:string[]){return parseSnapshot(await request(`${path(data)}/review/resolve`,'POST',{revision:data.revision,record_index,verified_fields,acknowledge:true}))},
     async confirm(data:AnalysisSnapshot){return parseSnapshot(await request(`${path(data)}/confirm`,'POST',{revision:data.revision}))},
     async explain(data:AnalysisSnapshot,language:Language):Promise<ExplanationPayload>{
       const result=await request(`${path(data)}/explanation`,'POST',{revision:data.revision,language}) as {revision?:string;analysis_id?:string;payload?:unknown;summary?:ConfirmedSummary}
@@ -99,4 +106,4 @@ export function createPrescriptionClient(fetcher:typeof fetch=(...args)=>fetch(.
   }
 }
 export const prescriptionClient=createPrescriptionClient()
-export type PrescriptionClient=ReturnType<typeof createPrescriptionClient>
+export type PrescriptionClient=Omit<ReturnType<typeof createPrescriptionClient>,'resolveReview'>&Partial<Pick<ReturnType<typeof createPrescriptionClient>,'resolveReview'>>

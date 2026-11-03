@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { explanationCopy } from '../lib/explanationCopy'
 import { afterEach,beforeEach,expect,it,vi } from 'vitest'
 import { act,cleanup,render,screen,waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -21,32 +22,33 @@ function client():PrescriptionClient{return {current:vi.fn(async()=>snapshot),im
 const scheduleState:ScheduleContext={analysis_id:'a',medicine_revision:'m',instruction_revision:'i',scheduling_revision:'s',ready:true,status:'succeeded',medicines:[medicine],instructions:[instruction],instruction_issues:[],association:{association_id:'link',medicine_ref:'medicine_001',instruction_id:'instruction_001'},plan:{dose_quantity:1,dose_unit:'tablet',duration_days:3,administrations_by_slot:{morning:1,noon:0,night:1,bedtime:0},start_date:'2026-10-27'},result:{derived_id:'r',payload:{name:'Fictional-A',status:'ok',reason:null,doses_by_slot:{morning:1,noon:0,night:1,bedtime:0},units_per_day:2,duration_days:3,total_units:6,unit:'tablet',start_date:'2026-10-27',end_date:'2026-10-29',refill_date:null}},error:null}
 beforeEach(()=>{URL.createObjectURL=vi.fn(()=>'blob:fixture');URL.revokeObjectURL=vi.fn()})
 afterEach(()=>{cleanup();vi.restoreAllMocks()})
+scheduleState.course_results=[{association:scheduleState.association!,plan:scheduleState.plan!,result:scheduleState.result as NonNullable<ScheduleContext['course_results']>[number]['result']}]
 it('navigates Analysis → Medicines → Schedule → Analysis with the same saved server state and no OCR',async()=>{
   const api=client();const schedules:SchedulingClient={current:vi.fn(async()=>scheduleState),associate:vi.fn(),clear:vi.fn(),invalidate:vi.fn(),review:vi.fn(),approve:vi.fn()}
   render(<MemoryRouter><nav><Link to="/">Nav analysis</Link><Link to="/medicines">Nav medicines</Link><Link to="/schedule">Nav schedule</Link></nav><Routes><Route path="/" element={<PrescriptionFlow client={api}/>}/><Route path="/medicines" element={<CurrentWorkspace kind="medicines" client={api}/>}/><Route path="/schedule" element={<Schedule client={schedules}/>}/></Routes></MemoryRouter>)
   await screen.findByLabelText('Medicine name 1');await screen.findByAltText('Prescription image selected for your review')
   const user=userEvent.setup();await user.click(screen.getByText('Nav medicines'));await screen.findByRole('heading',{name:'Fictional-A'})
   await user.click(screen.getByText('Nav schedule'));await screen.findByRole('region',{name:'Calculated schedule'})
-  expect(screen.getByText('6 tablet')).toBeTruthy()
+  expect(screen.getByText(/Course total: 6 tablet/)).toBeTruthy()
   await user.click(screen.getByText('Nav analysis'));await screen.findByLabelText('Medicine name 1')
   expect((screen.getByLabelText('Medicine name 1') as HTMLInputElement).value).toBe('Fictional-A')
   expect(api.current).toHaveBeenCalledTimes(3);expect(api.image).toHaveBeenCalledWith(snapshot)
   expect(api.upload).not.toHaveBeenCalled();expect(api.analyze).not.toHaveBeenCalled();expect(api.clear).not.toHaveBeenCalled()
   expect(schedules.approve).not.toHaveBeenCalled()
 })
-it('Hindi and Hinglish selection automatically fetches and displays distinct confirmed content',async()=>{
+it('Hindi and Hinglish only fetch source details after an explicit action',async()=>{
   const api=client();render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');const user=userEvent.setup()
-  await user.click(screen.getByRole('button',{name:'हिन्दी'}));await screen.findByText(labels.hi)
+  await user.click(screen.getByRole('button',{name:'हिन्दी'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hi');await user.click(screen.getByRole('button',{name:explanationCopy.hi.action}));await screen.findByText(labels.hi)
   expect(api.explain).toHaveBeenLastCalledWith(snapshot,'hi');expect(screen.getByText('लिखी हुई शक्ति: 250 mg')).toBeTruthy()
   expect(screen.getByRole('region',{name:'Confirmed medicine explanation'}).getAttribute('aria-label')).toBeTruthy()
   expect((screen.getByLabelText('Original medicine text 1') as HTMLTextAreaElement).value).toBe(medicine.raw_text)
-  await user.click(screen.getByRole('button',{name:'Hinglish'}));await screen.findByText(labels.hinglish)
-  await user.click(screen.getByRole('button',{name:'English'}));await screen.findByText(labels.en)
+  await user.click(screen.getByRole('button',{name:'Hinglish'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hinglish');await user.click(screen.getByRole('button',{name:explanationCopy.hinglish.action}));await screen.findByText(labels.hinglish)
+  await user.click(screen.getByRole('button',{name:'English'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'en');await user.click(screen.getByRole('button',{name:explanationCopy.en.action}));await screen.findByText(labels.en)
   expect(api.analyze).not.toHaveBeenCalled()
 })
 it('shows Hindi prerequisites without calling explanation for unconfirmed medicines',async()=>{
   const api=client();vi.mocked(api.current).mockResolvedValue({...snapshot,confirmed:false})
-  render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}))
+  render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hi');await userEvent.click(screen.getByRole('button',{name:explanationCopy.hi.action}))
   expect(screen.getByText(/चुनी हुई भाषा के लिए पहले/)).toBeTruthy();expect(api.explain).not.toHaveBeenCalled()
   expect(screen.queryByRole('region',{name:'Confirmed medicine explanation'})).toBeNull()
 })
@@ -57,25 +59,26 @@ it('never restores a late old analysis over a newly selected image',async()=>{
 })
 it('surfaces explanation errors without stale-language success',async()=>{
   const api=client();vi.mocked(api.explain).mockRejectedValue(new Error('Unavailable'))
-  render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}))
-  await screen.findByRole('alert');expect(screen.queryByRole('region',{name:'Confirmed medicine explanation'})).toBeNull()
+  render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hi');await userEvent.click(screen.getByRole('button',{name:explanationCopy.hi.action}))
+  await screen.findAllByRole('alert');expect(screen.queryByRole('region',{name:'Confirmed medicine explanation'})).toBeNull()
 })
 it('discards stale-language responses after source replacement',async()=>{
   const api=client();let resolve!:(s:ExplanationPayload)=>void;vi.mocked(api.explain).mockImplementation(()=>new Promise(r=>{resolve=r}))
-  render(<PrescriptionFlow client={api}/>);await screen.findByAltText('Prescription image selected for your review');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}));await waitFor(()=>expect(api.explain).toHaveBeenCalledTimes(1))
+  render(<PrescriptionFlow client={api}/>);await screen.findByAltText('Prescription image selected for your review');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hi');await userEvent.click(screen.getByRole('button',{name:explanationCopy.hi.action}));await waitFor(()=>expect(api.explain).toHaveBeenCalledTimes(1))
   await userEvent.click(screen.getByRole('button',{name:'Remove image'}));await act(async()=>resolve(explanation('hi')))
   expect(screen.queryByRole('region',{name:'Confirmed medicine explanation'})).toBeNull();expect(api.clear).toHaveBeenCalledTimes(1)
 })
 it('shows confirmed instruction values with Hindi descriptions and excludes unconfirmed test facts',async()=>{
   const api=client();vi.mocked(api.explain).mockResolvedValue({...explanation('hi'),summary:{schema_version:'confirmed-prescription-summary-v1',language:'hi',title:'पुष्टि किए गए पर्चे का सारांश',notice:'केवल पुष्टि किया गया पाठ',medicine_count:1,sections:{instructions:{title:'पुष्टि किए गए खुराक निर्देश',confirmed:true,issues:[],records:[{record_id:'instruction_001',original_text:medicine.raw_text,fields:[{field:'dose_quantity_raw',label:'खुराक की मात्रा',value:'1',is_unknown:false,text:'खुराक की मात्रा: 1'},{field:'dose_unit_raw',label:'खुराक की इकाई',value:'tablet',is_unknown:false,text:'खुराक की इकाई: tablet'}],uncertainty_reasons:[],needs_review:false}]},investigations:{title:'पुष्टि की गई जाँचें',confirmed:false,issues:[],records:[]}}}})
-  render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}))
+  render(<PrescriptionFlow client={api}/>);await screen.findByLabelText('Medicine name 1');await userEvent.click(screen.getByRole('button',{name:'हिन्दी'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hi');await userEvent.click(screen.getByRole('button',{name:explanationCopy.hi.action}))
   await screen.findByText('खुराक की मात्रा: 1');expect(screen.getByText('खुराक की इकाई: tablet')).toBeTruthy()
-  expect(screen.getByText(/इस अनुभाग की पुष्टि नहीं हुई/)).toBeTruthy()
+  expect(screen.queryByRole('heading',{name:'पुष्टि की गई जाँचें'})).toBeNull()
+  expect(screen.queryByText(/इस अनुभाग की पुष्टि नहीं हुई/)).toBeNull()
   expect((screen.getByLabelText('Original medicine text 1') as HTMLTextAreaElement).value).toBe(medicine.raw_text)
 })
 it('removes stale records, confirmation, explanation and preview when explicit restoration finds an expired session',async()=>{
   const api=client();render(<PrescriptionFlow client={api}/>);await screen.findByAltText('Prescription image selected for your review')
-  const user=userEvent.setup();await user.click(screen.getByRole('button',{name:'हिन्दी'}));await screen.findByText(labels.hi)
+  const user=userEvent.setup();await user.click(screen.getByRole('button',{name:'हिन्दी'}));expect(api.explain).not.toHaveBeenCalledWith(snapshot,'hi');await user.click(screen.getByRole('button',{name:explanationCopy.hi.action}));await screen.findByText(labels.hi)
   vi.mocked(api.current).mockResolvedValue(null)
   await user.click(screen.getByRole('button',{name:'Restore current session'}))
   await waitFor(()=>expect(screen.queryByLabelText('Medicine name 1')).toBeNull())

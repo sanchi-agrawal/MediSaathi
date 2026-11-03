@@ -1,4 +1,7 @@
 .venv/
+runtime/
+*.sqlite3
+*.sqlite3-*
 .env
 .env.*
 !.env.example

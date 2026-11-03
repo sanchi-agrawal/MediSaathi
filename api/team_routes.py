@@ -19,6 +19,10 @@ def register_team_routes(app,store,enabled_sections):
         session=store.get(request.cookies.get(COOKIE))
         if session is None:reject(401,'session_expired','Open a prescription in the current demo session.')
         return session
+    from .market_routes import register_market_routes
+    register_market_routes(app,load,reject)
+    from .planner_prefill import register_planner_prefill
+    register_planner_prefill(app,store)
     def medicine_context(s,analysis_id=None,revision=None):
         snap=s.ai.snapshot();root=snap['prescription']
         if not s.prescription_active or root is None or analysis_id is not None and root['analysis_id']!=analysis_id or revision is not None and revision!=s.revision:

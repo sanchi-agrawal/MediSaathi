@@ -10,3 +10,7 @@ pandas>=2,<4
 python-dateutil>=2.9,<3
 
 rapidfuzz>=3,<4
+cryptography>=44
+argon2-cffi>=25.1,<26
+PyMuPDF>=1.25,<2
+defusedxml>=0.7,<1

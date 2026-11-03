@@ -41,7 +41,9 @@ Production output: `dist/`. Static hosting must rewrite application routes to `i
 - `/dashboard/analysis`: real medicines Upload → Gemini OCR → Review → Save → Confirm → Explain; English/Hindi/Hinglish explanations through the existing offline assistant
 - `/dashboard/medicines`, `/dashboard/investigations`: integration placeholders
 - `/dashboard/expiry`: independent strip-image input and preview
-- `/dashboard/schedule`, `/dashboard/lab-costs`: teammate integration placeholders
+- `/dashboard/schedule`: medication scheduling
+- `/dashboard/medicine-pricing`: medicine price comparison
+- `/dashboard/lab-costs`: retired; redirects to Dashboard
 - `/dashboard/settings`: temporary local explanation preference
 - Unknown paths: recovery page
 

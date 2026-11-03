@@ -1,0 +1,61 @@
+/* Exact desktop halves; image is unpadded, edge-to-edge and never stretched. */
+.auth-page.image-auth{display:grid;grid-template-columns:50% 50%;width:100%;min-height:100svh;align-items:start}
+.image-auth .auth-image-panel{position:sticky;top:0;align-self:start;width:100%;height:100svh;min-width:0;margin:0;padding:0;border:0;border-radius:0;overflow:hidden}
+.image-auth .auth-image-panel img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%;border-radius:0}
+.image-auth .auth-image-panel::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,var(--tone--061426bd) 0%,var(--tone--06142670) 58%,var(--tone--06142608) 100%),linear-gradient(180deg,var(--tone--06142624) 0%,transparent 80%)}
+.auth-image-copy{position:absolute;z-index:1;top:20%;left:clamp(40px,5.6vw,80px);right:32px;max-width:500px;min-width:0}
+.image-auth .auth-image-heading{margin:0;color:var(--tone--fff);font-size:clamp(48px,4.05vw,58px);font-weight:700;line-height:1.12;letter-spacing:-.035em}
+.auth-image-heading>span{display:block}
+.image-auth .auth-image-highlight{color:var(--tone--ff8999)}
+.auth-image-accent{display:block;width:74px;height:3px;border-radius:2px;background:var(--tone--ff8999);box-shadow:0 0 12px var(--tone--ff899980),0 0 28px var(--tone--ff899933);margin-block:28px}
+.image-auth .auth-image-description{margin:0;max-width:420px;color:var(--tone--b7e6ff);font-size:clamp(22px,1.8vw,26px);line-height:1.55;font-weight:400;letter-spacing:0}
+.image-auth[lang=hi] .auth-image-heading{letter-spacing:0;line-height:1.4;font-size:clamp(40px,3.8vw,54px)}
+.image-auth[lang=hi] .auth-image-description{line-height:1.75}
+.image-auth .auth-form-side{min-width:0;min-height:100svh;padding:28px clamp(24px,4vw,64px);display:grid;grid-template-rows:auto 1fr;gap:24px;background:var(--bg);justify-content:normal}
+.image-auth .demo-login-header{width:100%;max-width:440px;margin-inline:auto;display:flex;flex-direction:column;align-items:stretch;gap:18px}
+.demo-login-header-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.image-auth .auth-back-home{align-self:flex-start;font-size:13px;line-height:20px;color:var(--muted)}
+.image-auth .auth-back-home:hover{color:var(--text)}
+.image-auth .demo-login-form-wrap{display:grid;align-items:center;min-width:0;padding-block:16px}
+.image-auth .auth-form-content{width:100%;max-width:440px;margin:0 auto}
+.image-auth .auth-form-content h2{font-size:30px;line-height:38px;margin:14px 0 10px}
+.image-auth .auth-form-content>p{font-size:14px;line-height:22px;margin:0 0 20px}
+.image-auth .auth-form-content form{gap:16px;width:100%}
+.image-auth form>label{display:block;width:100%;font-size:14px;line-height:20px}
+.image-auth form>label>input,.image-auth .password-input,.image-auth form>.button{width:100%;box-sizing:border-box}
+.image-auth form>label>input,.image-auth .password-input input{display:block;min-height:48px;line-height:24px;font-size:15px}
+.image-auth form>label>input,.image-auth .password-input{margin-top:8px}
+.image-auth .password-input input{width:100%;margin-top:0}
+.image-auth .password-input .icon-button{top:8px}
+.image-auth form>.button{min-height:48px;margin-top:4px;font-size:14px;line-height:22px}
+.image-auth form>[role=alert]{font-size:13px;line-height:20px}
+.image-auth .demo-login-notes{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.image-auth .demo-login-notes p{font-size:12px;line-height:19px;margin:0;color:var(--muted)}
+.image-auth .demo-login-notes p+p{margin-top:6px}
+.image-auth .auth-switch{margin:16px 0 0;font-size:13px;line-height:22px}
+.image-auth[lang=hi]{font-family:'Noto Sans Devanagari','Segoe UI',sans-serif}
+.image-auth[lang=hi] h2{letter-spacing:0;line-height:1.45}
+@media(min-width:761px) and (max-height:800px){
+ .image-auth .auth-form-side{padding-block:24px;gap:16px}
+ .image-auth .demo-login-header{gap:12px}
+ .image-auth .demo-login-form-wrap{padding-block:8px}
+ .image-auth .auth-form-content h2{font-size:28px;line-height:36px}
+ .image-auth .auth-form-content>p{margin-bottom:16px}
+ .image-auth .demo-login-notes{margin-top:16px}
+}
+@media(max-width:760px){
+ .auth-page.image-auth{grid-template-columns:minmax(0,1fr)}
+ .image-auth .auth-image-panel{position:relative;height:clamp(340px,44svh,420px)}
+ .image-auth .auth-image-panel img{object-position:50% 38%}
+ .auth-image-copy{top:36px;left:24px;right:24px;max-width:440px}
+ .image-auth .auth-image-heading{font-size:clamp(30px,7.5vw,40px);line-height:1.15}
+ .auth-image-accent{width:56px;margin-block:20px}
+ .image-auth .auth-image-description{font-size:18px;line-height:1.5;max-width:360px}
+ .image-auth[lang=hi] .auth-image-heading{font-size:clamp(28px,7vw,36px);line-height:1.4}
+ .image-auth[lang=hi] .auth-image-description{font-size:17px;line-height:1.7}
+ .image-auth .auth-form-side{padding:24px;min-height:0;gap:28px}
+ .image-auth .demo-login-form-wrap{align-items:start;padding:0 0 16px}
+ .image-auth .auth-form-content h2{font-size:27px;line-height:36px}
+ .demo-login-header-row{gap:12px;flex-wrap:wrap}
+ .image-auth .demo-login-header .brand{font-size:20px}
+}

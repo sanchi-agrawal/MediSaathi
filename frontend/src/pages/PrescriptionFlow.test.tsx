@@ -19,9 +19,10 @@ function client():PrescriptionClient {
 async function start(api:PrescriptionClient){
   render(<PrescriptionFlow client={api}/>)
   const user=userEvent.setup()
+  await user.click(screen.getByRole('checkbox',{name:/Dosage instructions/}))
   await user.upload(screen.getByLabelText('Upload Prescription image'),new File(['fictional-image'],'fictional.png',{type:'image/png'}))
   await screen.findByAltText('Prescription image selected for your review')
-  await user.click(screen.getByRole('button',{name:'Analyze with AI'}))
+  await user.click(screen.getByRole('button',{name:'Analyze Prescription with AI'}))
   return user
 }
 async function saveAndConfirm(api:PrescriptionClient){
@@ -42,11 +43,11 @@ describe('real prescription page workflow with offline client',()=>{
     render(<PrescriptionFlow client={api}/>);const user=userEvent.setup()
     await user.upload(screen.getByLabelText('Upload Prescription image'),new File(['x'],'x.png',{type:'image/png'}))
     await screen.findByAltText('Prescription image selected for your review')
-    const button=screen.getByRole('button',{name:'Analyze with AI'})
+    const button=screen.getByRole('button',{name:'Analyze Prescription with AI'})
     act(()=>{button.dispatchEvent(new MouseEvent('click',{bubbles:true}));button.dispatchEvent(new MouseEvent('click',{bubbles:true}))})
     await waitFor(()=>expect(api.analyze).toHaveBeenCalledTimes(1))
     expect(api.upload).toHaveBeenCalledTimes(1)
-    expect((screen.getByRole('button',{name:'Analyzing image…'}) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('button',{name:'Analyzing prescription…'}) as HTMLButtonElement).disabled).toBe(true)
     finish(snapshot);await screen.findByLabelText('Medicine name 1')
   })
   it('shows honest elapsed waiting feedback and sends no automatic retry',async()=>{
@@ -55,7 +56,7 @@ describe('real prescription page workflow with offline client',()=>{
     const api=client();let finish!:(value:AnalysisSnapshot)=>void
     api.analyze=vi.fn(()=>new Promise<AnalysisSnapshot>(resolve=>{finish=resolve}))
     await start(api)
-    await screen.findByText('Waiting for Gemini extraction…')
+    await screen.findByText('Waiting for extraction service…')
     now=22000;act(()=>{vi.advanceTimersByTime(22000)})
     expect(screen.getByText(/22 s elapsed/)).toBeTruthy()
     expect(screen.getByText(/request is still pending/)).toBeTruthy()
@@ -68,7 +69,7 @@ describe('real prescription page workflow with offline client',()=>{
     await user.upload(screen.getByLabelText('Upload Prescription image'),new File(['x'],'x.png',{type:'image/png'}))
     await screen.findByAltText('Prescription image selected for your review')
     expect(api.analyze).not.toHaveBeenCalled();expect(api.upload).not.toHaveBeenCalled()
-    expect((screen.getByRole('button',{name:'Analyze with AI'}) as HTMLButtonElement).disabled).toBe(false)
+    expect((screen.getByRole('button',{name:'Analyze Prescription with AI'}) as HTMLButtonElement).disabled).toBe(false)
   })
   it('shows all ten fields and preserves unknowns, then saves, confirms and explains',async()=>{
     const api=client();const user=await saveAndConfirm(api)
@@ -80,6 +81,19 @@ describe('real prescription page workflow with offline client',()=>{
     await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     expect(await screen.findByText(explained.notice)).toBeTruthy()
     expect(api.explain).toHaveBeenCalledWith(expect.objectContaining({confirmed:true}),'en')
+  })
+  it('omits the large review checklist while keeping medicine review and confirmation',async()=>{
+    const api=client()
+    api.analyze=vi.fn(async()=>({...snapshot,review_requirements:[{record_index:0,source_flagged:true,flagged:true,missing_fields:['salt'],unsupported_fields:['frequency_pattern','timing','duration_days'],confidence_state:'acceptable' as const,can_resolve:false,required_verifications:[]}]}))
+    const user=await start(api)
+    await screen.findByLabelText('Medicine name 1')
+    expect(screen.queryByText('What still needs review?')).toBeNull()
+    expect(screen.queryByText(/This record remains flagged/)).toBeNull()
+    expect(screen.queryByText(/Missing fields: Printed ingredient/)).toBeNull()
+    expect(screen.getByLabelText('Printed ingredient 1')).toBeTruthy()
+    await user.click(screen.getByRole('button',{name:'Save reviewed records'}))
+    await waitFor(()=>expect(api.review).toHaveBeenCalledOnce())
+    expect(screen.getByRole('button',{name:'Confirm medicines'})).toBeTruthy()
   })
   it('removes confirmation/explanation immediately on edit and invalidates the server',async()=>{
     const api=client();const user=await saveAndConfirm(api)
@@ -104,7 +118,7 @@ describe('real prescription page workflow with offline client',()=>{
     await screen.findByRole('button',{name:'Confirmed by server'})
     await user.click(screen.getByRole('button',{name:/^(Explain confirmed medicines|पुष्टि की गई दवाओं की व्याख्या देखें|Confirmed dawaon ki explanation dekhein)$/}))
     await screen.findByText(explained.notice)
-    const button=screen.getByRole('button',{name:'Analyze with AI'})
+    const button=screen.getByRole('button',{name:'Analyze Prescription with AI'})
     expect((button as HTMLButtonElement).disabled).toBe(true)
     await user.click(button)
     expect(api.analyze).toHaveBeenCalledTimes(1)
@@ -120,6 +134,16 @@ describe('real prescription page workflow with offline client',()=>{
     await screen.findByText(/Extraction succeeded with zero medicines/)
     expect(api.analyze).toHaveBeenCalledTimes(2)
     expect(api.upload).toHaveBeenCalledTimes(1)
+  })
+  it('shows the safe diagnostic reference only for the failed analysis',async()=>{
+    const api=client();api.analyze=vi.fn(async()=>({...snapshot,status:'failed' as const,records:null,original_records:null,error:{category:'provider_error',message:'Gemini could not complete the request.'},diagnostic_reference:'4f0a19ab65c13d28'}))
+    render(<PrescriptionFlow client={api}/>);const user=userEvent.setup()
+    await user.upload(screen.getByLabelText('Upload Prescription image'),new File(['fictional-image'],'fictional.png',{type:'image/png'}))
+    await screen.findByAltText('Prescription image selected for your review')
+    await user.click(screen.getByRole('button',{name:'Analyze Prescription with AI'}))
+    expect(await screen.findByText('Diagnostic reference: 4f0a19ab65c13d28')).toBeTruthy()
+    expect(screen.queryByLabelText('Medicine name 1')).toBeNull()
+    expect(api.analyze).toHaveBeenCalledTimes(1)
   })
   it('ignores an old extraction response after removing its source',async()=>{
     const api=client();let resolve!:(value:AnalysisSnapshot)=>void

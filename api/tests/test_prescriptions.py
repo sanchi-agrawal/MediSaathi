@@ -204,7 +204,7 @@ def test_failed_extraction_can_only_retry_explicitly():
     assert post(client,state,"analyze").status_code == 409
 
 
-@pytest.mark.parametrize("data,mime,status", [(b"invalid","image/png",422),(b"","image/jpeg",422),(b"GIF89a","image/png",422),(b"x"*(reader.MAX_IMAGE_BYTES+1),"image/png",413),(b"text","text/plain",415)], ids=["corrupt","empty","gif","oversized","wrong-mime"])
+@pytest.mark.parametrize("data,mime,status", [(b"invalid","image/png",422),(b"","image/jpeg",422),(b"GIF89a","image/png",422),(b"x"*(reader.MAX_IMAGE_BYTES+1),"image/png",413),(b"text","application/x-executable",415)], ids=["corrupt","empty","gif","oversized","wrong-mime"])
 def test_invalid_and_oversized_images(data,mime,status):
     client, _ = make_client()
     assert client.post("/api/prescriptions",content=data,headers={"Content-Type":mime}).status_code == status

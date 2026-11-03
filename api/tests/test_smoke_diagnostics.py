@@ -74,7 +74,7 @@ def test_runner_logs_only_safe_fields_and_preserves_guard_on_failure(monkeypatch
     marker=tmp_path/"offline-only.json"
     client=client_for(create_smoke_app("live",result_path=marker))
     result=analyze(client,upload(client,FIXTURE.read_bytes()).json()).json()
-    assert result["status"] == "failed" and result["error"]["category"] == "api_error"
+    assert result["status"] == "failed" and result["error"]["category"] == "quota_exceeded"
     report=json.loads(marker.read_text())
     assert report["diagnostics"]["provider_http_status"] == 429
     assert report["diagnostics"]["category"] == "quota_or_rate_limit"

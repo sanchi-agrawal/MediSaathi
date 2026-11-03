@@ -3,16 +3,26 @@ import { ApiError,isMedicine } from './prescriptions'
 import { validPayload } from './sections'
 export const SLOTS=['morning','noon','night','bedtime'] as const
 export type Slot=typeof SLOTS[number]
+export type NamedSlot='morning'|'afternoon'|'night'|'bedtime'
 export interface SchedulePlan{dose_quantity:number;dose_unit:'tablet'|'capsule'|'mL'|'drop';duration_days:number;administrations_by_slot:Record<Slot,number>;start_date:string}
 export interface ScheduleSuccess{name:string;status:'ok';reason:null;doses_by_slot:Record<Slot,number>;units_per_day:number;duration_days:number;total_units:number;unit:SchedulePlan['dose_unit'];start_date:string;end_date:string;refill_date:string|null}
 export interface ScheduleRefusal{name:string;status:'needs_input'|'as_needed';reason:string}
+export type Association={association_id:string;medicine_ref:string;instruction_id:string}
+const specificDoseIssues={notation_confirmation_required:'Confirm the named timing slots in Prescription Review.',dose_quantity_missing:'Review the missing dose quantity.',dose_unit_missing:'Review the missing dose unit.',medicine_review_flag:'The original medicine remains flagged for review. The scheduling engine cannot proceed while that flag is unresolved.'}
+export const scheduleIssues:Record<string,string>={...specificDoseIssues,association_required:'Link this medicine to its confirmed instruction in Prescription Review.',dose_missing:'Review the missing dose quantity or unit.',duration_missing:'Review the missing course duration.',frequency_conflict:'Review the missing or conflicting frequency.',timing_missing:'Review the missing explicit time-of-day slots.',frequency_unsupported:'This frequency is unsupported or ambiguous. Return to review; do not guess.',duration_unsupported:'Duration must be an explicit supported whole-day course, without ranges or tapers.',quantity_unsupported:'The dose quantity is ambiguous or unsupported. Return to review.',source_requires_clarification:'Source details conflict or contain unsupported instructions. Check dose, unit, duration, frequency and literal morning/noon/night/bedtime timing.'}
+export interface AutomaticEntry{medicine_ref:string;association:Association|null;template:Omit<SchedulePlan,'start_date'>|null;issues:string[];proposed_slots?:NamedSlot[];confirmed_slots?:NamedSlot[]}
 export interface ScheduleContext{
+  timing_contract?:'confirmed-named-slots-v1'
   analysis_id:string;medicine_revision:string;instruction_revision:string;scheduling_revision:string;ready:boolean
   status:'blocked'|'ready'|'associated'|'reviewed'|'succeeded'|'needs_input'|'failed'
   medicines:MedicineRecord[];instructions:InstructionRecord[];instruction_issues:string[]
   association:{association_id:string;medicine_ref:string;instruction_id:string}|null
   plan:SchedulePlan|null;result:{derived_id:string;payload:ScheduleSuccess|ScheduleRefusal}|null
   error:{category:string;message:string}|null
+  associations?:Association[];automatic?:AutomaticEntry[]
+  association_proposals?:{medicine_ref:string;instruction_id:string|null;status:'proposed'|'confirmed'|'ambiguous'|'unmatched'|'missing_instruction'}[]
+  instruction_state?:{status:string;reviewed:boolean;confirmed:boolean}
+  course_results?:{association:Association;plan:SchedulePlan;result:{derived_id:string;payload:ScheduleSuccess}}[]
 }
 const exact=(v:unknown,fields:string[]):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===fields.length&&fields.every(k=>Object.hasOwn(v,k))
 const finite=(v:unknown)=>typeof v==='number'&&Number.isFinite(v)&&v>=0
@@ -29,6 +39,12 @@ export function validResult(v:unknown):v is ScheduleSuccess|ScheduleRefusal{
 }
 export function parseScheduling(v:unknown):ScheduleContext{
   const s=v as ScheduleContext
+  const named=(value:unknown)=>Array.isArray(value)&&value.every(x=>typeof x==='string'&&['morning','afternoon','night','bedtime'].includes(x))&&new Set(value).size===value.length
+  if(Array.isArray(s?.automatic)&&s.automatic.some(e=>(e.confirmed_slots!==undefined&&!named(e.confirmed_slots))||(e.proposed_slots!==undefined&&!named(e.proposed_slots))))throw new ApiError('invalid_response','Invalid named timing slots.')
+  if(s?.association_proposals!==undefined&&(!Array.isArray(s.association_proposals)||!s.association_proposals.every(p=>typeof p.medicine_ref==='string'&&['proposed','confirmed','ambiguous','unmatched','missing_instruction'].includes(p.status)&&(p.instruction_id===null||typeof p.instruction_id==='string'))))throw new ApiError('invalid_response','Invalid association proposals.')
+  if(s?.instruction_state!==undefined&&(!['not_requested','running','succeeded','failed'].includes(s.instruction_state.status)||typeof s.instruction_state.reviewed!=='boolean'||typeof s.instruction_state.confirmed!=='boolean'))throw new ApiError('invalid_response','Invalid instruction state.')
+  if(s?.automatic!==undefined&&(!Array.isArray(s.automatic)||!s.automatic.every(e=>typeof e.medicine_ref==='string'&&Array.isArray(e.issues)&&e.issues.every(i=>typeof i==='string')&&(e.template===null||validPlan({...e.template,start_date:'2000-01-01'})))))throw new ApiError('invalid_response','Invalid scheduling preparation.')
+  if(s?.course_results!==undefined&&(!Array.isArray(s.course_results)||!s.course_results.every(r=>r.association&&typeof r.association.association_id==='string'&&validPlan(r.plan)&&r.result?.payload.status==='ok'&&validResult(r.result.payload))))throw new ApiError('invalid_response','Invalid course results.')
   if(!s||![s.analysis_id,s.medicine_revision,s.instruction_revision,s.scheduling_revision].every(v=>typeof v==='string'&&!!v)||typeof s.ready!=='boolean'||!['blocked','ready','associated','reviewed','succeeded','needs_input','failed'].includes(s.status)||!Array.isArray(s.medicines)||!s.medicines.every(isMedicine)||
     !validPayload({schema_version:'medication-instructions-v1',source_image_sha256:'0'.repeat(64),instructions:s.instructions,issues:s.instruction_issues,confirmation_required:true},'instructions')||
     !(s.association===null||(exact(s.association,['association_id','medicine_ref','instruction_id'])&&Object.values(s.association).every(v=>typeof v==='string'&&!!v)))||!(s.plan===null||validPlan(s.plan))||
@@ -73,7 +89,9 @@ export function createSchedulingClient(fetcher:typeof fetch=(...args)=>fetch(...
     invalidate:(s:ScheduleContext)=>request(path(s)+'/schedule/invalidate','POST',linked(s)),
     review:(s:ScheduleContext,plan:SchedulePlan)=>{if(!validPlan(plan))return Promise.reject(new ApiError('invalid_input','Review every explicit schedule input.'));return request(path(s)+'/schedule/review','PUT',{...linked(s),plan})},
     approve:(s:ScheduleContext)=>request(path(s)+'/schedule/approve','POST',linked(s)),
+    confirmNotation:(s:ScheduleContext)=>request(path(s)+'/schedule/notation/confirm','POST',linked(s)),
+    confirmSlots:(s:ScheduleContext,slots:NamedSlot[])=>request(path(s)+'/schedule/slots/confirm','POST',{...linked(s),slots}),
   }
 }
 export const schedulingClient=createSchedulingClient()
-export type SchedulingClient=ReturnType<typeof createSchedulingClient>
+export type SchedulingClient=Omit<ReturnType<typeof createSchedulingClient>,'confirmNotation'|'confirmSlots'>&Partial<Pick<ReturnType<typeof createSchedulingClient>,'confirmNotation'|'confirmSlots'>>

@@ -5,6 +5,15 @@ import type { AnalysisSnapshot } from './prescriptions'
 const record={raw_text:'Fictional text',name:null,salt:null,strength:null,form:null,frequency_pattern:null,duration_days:null,timing:null,confidence:null,needs_review:true}
 const state:AnalysisSnapshot={analysis_id:'a',revision:'r',status:'succeeded',original_records:[record],records:[record],error:null,reviewed:true,confirmed:false}
 describe('medicine HTTP boundary',()=>{
+  it('preserves JSON upload rejection and never starts analysis after it',async()=>{
+    const fetcher=vi.fn(async(path:RequestInfo|URL)=>String(path).endsWith('/session')
+      ?Response.json({mode:'local-demo'})
+      :Response.json({detail:{category:'image_validation_error',message:'Use the registered demo images.'}},{status:422}))
+    const client=createPrescriptionClient(fetcher)
+    await expect(client.upload(new File(['invalid'],'sample.png',{type:'image/png'}))).rejects.toMatchObject({category:'image_validation_error',status:422})
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(fetcher.mock.calls.every(([path])=>!String(path).endsWith('/analyze'))).toBe(true)
+  })
   it('uploads the original File as raw image bytes without JSON or multipart conversion',async()=>{
     const file=new File([new Uint8Array([137,80,78,71,13,10,26,10])],'fictional.png',{type:'image/png'})
     const fetcher=vi.fn(async()=>Response.json(state))

@@ -1,0 +1,17 @@
+export const clockSchedulingHindi:Record<string,string>={
+ 'Complete medicines can be scheduled now. Medicines needing clarification stay visible and are excluded from generation.':'पूरी जानकारी वाली दवाओं की समय-सारणी अभी बना सकते हैं। जिन दवाओं की जानकारी स्पष्ट नहीं है, वे दिखाई देंगी लेकिन उनकी समय-सारणी नहीं बनेगी।',
+ 'Not included in this schedule':'इस समय-सारणी में शामिल नहीं हैं',
+ 'Administration':'दवा लेने का समय',
+ 'YOUR CONFIRMED PRESCRIPTION':'आपका पुष्टि किया गया पर्चा',
+ 'Choose a start date and your medicine-taking times. Confirmed dosage and duration stay unchanged.':'शुरू करने की तारीख और दवा लेने के समय चुनें। पुष्टि की गई खुराक और अवधि वही रहेंगी।',
+ 'Clock times are your preferences in India time (Asia/Kolkata). Follow the confirmed prescription and ask your clinician if timing is unclear. No notifications are sent.':'ये आपके चुने हुए समय हैं, भारतीय समय (Asia/Kolkata) के अनुसार। पुष्टि किए गए पर्चे का पालन करें। समय स्पष्ट न हो तो चिकित्सक से पूछें। कोई सूचना नहीं भेजी जाती।',
+ 'Clarify and confirm the daily administration count in Prescription Review.':'पर्चे की जाँच में स्पष्ट करें और पुष्टि करें कि रोज़ कितनी बार दवा लेनी है।',
+ 'Confirm medicines and instructions in Prescription Analysis first.':'पहले पर्चे के विश्लेषण में दवाओं और निर्देशों की पुष्टि करें।',
+ 'Medicine start date':'दवा शुरू करने की तारीख',
+ 'Medicine-taking times':'दवा लेने के समय',
+ '{0} prescribed administrations each day':'पर्चे के अनुसार रोज़ {0} बार दवा लेनी है',
+ '{0} — administration {1}: {2}':'{0} — खुराक {1}: {2}',
+ 'Your dated medicine schedule':'तारीख के अनुसार आपकी दवा की समय-सारणी',
+ 'Some medicines remain blocked. Their instructions need review before scheduling.':'कुछ दवाओं की समय-सारणी अभी नहीं बनी है। पहले उनके निर्देशों की जाँच करें।',
+ 'invalid_clock_times':'हर पुष्टि की गई खुराक के लिए अलग, सही समय चुनें और दिखाए गए क्रम में भरें। अतिरिक्त खुराक न जोड़ें।',
+}

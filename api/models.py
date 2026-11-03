@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field,field_validator
 
 
 class RevisionRequest(BaseModel):
@@ -16,6 +16,16 @@ class ReviewRequest(RevisionRequest):
 
 class ExplanationRequest(RevisionRequest):
     language: Literal["en", "hi", "hinglish"]
+
+class ResolveMedicineReviewRequest(RevisionRequest):
+    record_index:int=Field(ge=0,le=199)
+    verified_fields:list[str]=Field(min_length=8,max_length=8)
+    acknowledge:Literal[True]
+    @field_validator('acknowledge',mode='before')
+    @classmethod
+    def explicit_consent(cls,value):
+        if value is not True:raise ValueError('Explicit review required')
+        return value
 
 
 class SectionReviewRequest(RevisionRequest):

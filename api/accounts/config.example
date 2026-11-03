@@ -1,0 +1,11 @@
+# Copy to api/.env, fill locally, and never commit api/.env.
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY=YOUR_PROJECT_PUBLISHABLE_KEY
+# Alternatively SUPABASE_ANON_KEY accepts the legacy anon key. Never use service_role.
+MEDISAATHI_ARCHIVE_KEY=GENERATE_ONCE_AND_KEEP_PRIVATE
+# Optional: read only the two Gemini fields from the existing private AI config.
+MEDISAATHI_GEMINI_ENV_FILE=C:/Users/ASHTAMI/MediSaathi/medisaathi/.env
+# Isolated manual account acceptance: real Supabase, fictional OCR, no Gemini.
+MEDISAATHI_FICTIONAL_OCR=1
+MEDISAATHI_API_PORT=8004
+MEDISAATHI_ORIGINS=http://localhost:5176,http://127.0.0.1:5176

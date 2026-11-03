@@ -22,6 +22,7 @@ from google import genai
 from google.genai import errors, types
 
 import reader
+from prescription_language import MULTILINGUAL_GUIDE
 
 SCHEMA_VERSION = "prescribed-investigations-v1"
 TEXT_FIELDS = ("test_name_raw", "raw_text", "order_context_raw", "specimen_raw",
@@ -120,6 +121,8 @@ def _source_status(item):
         suffix = r"\s+(?:not advised|not required|cancelled|canceled)\b"
         if re.search(prefix + token + r"(?!\w)|(?<!\w)" + token + suffix, text, re.IGNORECASE):
             return "negated"
+        hindi_negative=r'\s*(?:जाँच\s*)?(?:नहीं\s*(?:कराएँ|करायें|करें|करना|चाहिए)|न\s*(?:कराएँ|करें)|मत\s*(?:कराएँ|करें))'
+        if re.search(token+hindi_negative,text):return 'negated'
         # A shorter heading such as "Order" must not hide a conditional/question
         # directly attached to this test elsewhere in its quoted source segment.
         conditional = r"\b(?:consider|maybe|possibly|if needed)\s+"
@@ -127,6 +130,8 @@ def _source_status(item):
             return "unclear"
     if re.match(r"\s*(?:previous|past|historical|old|history)\b", context, re.IGNORECASE):
         return "historical_result"
+    if re.match(r'\s*(?:पुरानी\s*रिपोर्ट|पिछली\s*जाँच|पूर्व\s*रिपोर्ट)',context):return 'historical_result'
+    if re.search(r'(?:यदि|अगर|जरूरत\s*हो|ज़रूरत\s*हो|आवश्यकतानुसार)',context):return 'unclear'
     if re.match(r"\s*(?:diagnosis|diagnoses|symptoms?)\s*:", context, re.IGNORECASE):
         return "non_order"
     if status == "unclear" or re.search(r"\b(?:consider|maybe|possibly|if needed)\b|\?", context, re.IGNORECASE):
@@ -263,6 +268,12 @@ No prices, test matching, scheduling, clinical advice or additional tests.
 IDs, image provenance and mandatory confirmation flags are added by Python.
 """
 
+
+SYSTEM_INSTRUCTION += MULTILINGUAL_GUIDE + '''
+Preserve Hindi investigation names as written. नहीं कराएँ/न कराएँ are not
+positive orders; पुरानी रिपोर्ट is not a new test order. If ordering is unclear,
+retain literal evidence as unclear rather than inferring an ordered test.
+'''
 
 def read_prescribed_investigations(image_bytes: bytes) -> dict:
     """Validate image, request literal transcription, then normalize separately.

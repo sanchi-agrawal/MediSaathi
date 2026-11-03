@@ -116,12 +116,12 @@ def test_plan_cannot_disagree_with_source(change):
     client,_,_,_=setup();p=plan();p.update(change)
     assert approve(client,save(client,associate(client),p)).status_code==422
 
-def test_explicit_different_named_slots_pass_ai_but_engine_disagreement_is_rejected():
+def test_explicit_named_slots_are_honored_without_abbreviation_reinterpretation():
     med=medicine();med.update(raw_text='Fictional-A 1 tablet BD noon and night for 3 days',timing='noon and night')
     client,_,_,_=setup(med,lambda i:i.update(timing_raw='noon and night'))
     p=plan();p['administrations_by_slot']=dict(morning=0,noon=1,night=1,bedtime=0)
     r=approve(client,save(client,associate(client),p))
-    assert r.status_code==502 and current(client)['result'] is None
+    assert r.status_code==200 and r.json()['result']['payload']['doses_by_slot']==dict(morning=0,noon=1,night=1,bedtime=0)
 
 @pytest.mark.parametrize('field,value',[('dose_quantity',True),('dose_quantity',0),('dose_quantity',-1),
     ('dose_quantity',1001),('dose_quantity','NaN'),('duration_days',True),('duration_days',366),
@@ -173,7 +173,9 @@ def test_plan_edit_association_change_and_clear_invalidate_results():
     assert s['result'] is None and s['plan'] is None and s['status']=='associated'
     assert approve(client,old).status_code==409
     s=approve(client,save(client,s)).json()
-    s=associate(client);assert s['result'] is None
+    duplicate=client.post(route(s,'/associations'),json={**binding(s),'medicine_ref':'medicine_001','instruction_id':'instruction_001'})
+    assert duplicate.status_code==409 and duplicate.json()['detail']['category']=='association_exists'
+    assert current(client)['result'] is not None
     assert client.request('DELETE',route(s,'/associations'),json=binding(s)).status_code==200
     assert current(client)['association'] is None
     upload(client,image_bytes(size=(5,5)));assert not current(client)['ready']
@@ -197,13 +199,14 @@ def test_invalid_engine_output_and_exceptions_never_become_schedules(damage,monk
     assert r.status_code==502 and 'patient detail' not in r.text
     assert current(client)['result'] is None
 
-def test_unavailable_and_engine_needs_input_are_explicit():
+def test_unavailable_is_explicit_and_clinical_review_does_not_erase_ocr_flag():
     client,_,_,_=setup(callback=None)
     assert approve(client,save(client,associate(client))).status_code==503
     med=medicine();med['needs_review']=True
     client,_,_,_=setup(med);r=approve(client,save(client,associate(client)))
-    assert r.status_code==200 and r.json()['status']=='needs_input'
-    assert 'total_units' not in r.json()['result']['payload']
+    assert r.status_code==200 and r.json()['status']=='succeeded'
+    assert r.json()['result']['payload']['status']=='ok'
+    assert current(client)['medicines'][0]['needs_review'] is True
 
 def test_concurrent_approvals_call_engine_once():
     calls=[]

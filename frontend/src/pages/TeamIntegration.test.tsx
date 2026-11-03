@@ -3,7 +3,6 @@ import { afterEach,expect,it,vi } from 'vitest'
 import { cleanup,fireEvent,render,screen,waitFor,act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import Pricing from './Pricing'
 import MedicineMatching from '../components/MedicineMatching'
 import ReminderPreview from '../components/ReminderPreview'
 import { createTeamClient,parseMatches,parsePrice } from '../lib/team'
@@ -19,6 +18,7 @@ const schedule={analysis_id:'a',medicine_revision:'m',instruction_revision:'i',s
 const preview:Preview={analysis_id:'a',medicine_revision:'m',instruction_revision:'i',scheduling_revision:'s',association_id:'pair',state:'ready',timezone:'Asia/Kolkata',window_days:7,clock_times:{morning:'08:15',night:'20:30'},doses:[{slot:'morning',due_at:'2026-11-02T08:15:00+05:30',amount:1,unit:'tablet'}],refill_notes:[],notifications_enabled:false,notice:'Reminder Preview — Notifications not enabled.'}
 function client():TeamClient{return {current:vi.fn(async()=>({...matches,state:'not_requested' as const,records:[]})),match:vi.fn(async()=>matches),select:vi.fn(async()=>({...matches,records:[{...matches.records[0],selected:candidate.candidate_id}]})),catalogue:vi.fn(async()=>[item]),price:vi.fn(async()=>unavailable),preview:vi.fn(async()=>preview)}}
 afterEach(()=>{cleanup();vi.restoreAllMocks()})
+it('opens pricing from a confirmed medicine with its workspace reference without selecting a substitute',async()=>{const c=client();const original={...source,confirmed:true,records:[{name:'Dolo',strength:'650 mg'}]} as AnalysisSnapshot;const before=JSON.stringify(original);render(<MemoryRouter><MedicineMatching source={original} client={c}/></MemoryRouter>);expect(screen.getByRole('link',{name:'Compare Prices'}).getAttribute('href')).toBe('/dashboard/medicine-pricing?q=Dolo&medicine_ref=medicine_001');expect(JSON.stringify(original)).toBe(before);expect(c.select).not.toHaveBeenCalled();await waitFor(()=>expect(c.current).toHaveBeenCalledOnce())})
 it('only identifies on explicit action and only chooses after separate selection',async()=>{
   const c=client();render(<MemoryRouter><MedicineMatching source={source} client={c}/></MemoryRouter>);const user=userEvent.setup()
   await waitFor(()=>expect(c.current).toHaveBeenCalledOnce());expect(c.match).not.toHaveBeenCalled()
@@ -34,17 +34,6 @@ it('restores prior server selection without matching again',async()=>{
 it('shows a failed matching request without chosen candidates',async()=>{
   const c=client();vi.mocked(c.match).mockRejectedValue(new Error('Catalogue unavailable'))
   render(<MemoryRouter><MedicineMatching source={source} client={c}/></MemoryRouter>);await userEvent.click(screen.getByRole('button',{name:'Find catalogue candidates'}));await screen.findByRole('alert');expect(screen.queryByText(/Selected by user/)).toBeNull()
-})
-it('shows honest unavailable prices and never renders a fabricated amount',async()=>{
-  const c=client();render(<Pricing kind="medicine" client={c}/>);const user=userEvent.setup();await screen.findByRole('option',{name:/Audited fictional item/})
-  await user.selectOptions(screen.getByLabelText('Audited catalogue item'),'MED001');await user.click(screen.getByRole('button',{name:'Check verified availability'}));await screen.findByRole('heading',{name:'No verified Delhi price available'})
-  expect(c.price).toHaveBeenCalledWith('medicine',{item_id:'MED001'});expect(screen.getByRole('button',{name:/Compare prices/}).hasAttribute('disabled')).toBe(true)
-})
-it('shows ambiguous lookup and errors separately and clears old lookup after edits',async()=>{
-  const c=client();vi.mocked(c.price).mockResolvedValue({...unavailable,state:'ambiguous',item:null,candidates:[item],reasons:['multiple_exact_catalogue_matches']})
-  render(<Pricing kind="lab" client={c}/>);const user=userEvent.setup();await user.type(screen.getByLabelText('Exact original name'),'Fictional panel');await user.click(screen.getByRole('button',{name:'Check verified availability'}));await screen.findByText('Ambiguous catalogue identity — review exact variant')
-  await user.type(screen.getByLabelText('Exact original name'),' changed');expect(screen.queryByText('Ambiguous catalogue identity — review exact variant')).toBeNull()
-  vi.mocked(c.price).mockRejectedValue(new Error('Dataset unavailable'));await user.click(screen.getByRole('button',{name:'Check verified availability'}));await screen.findByRole('alert');expect(screen.queryByText('No exact catalogue match')).toBeNull()
 })
 it('requires clock preferences without default times and clears preview when changed',async()=>{
   const c=client();render(<ReminderPreview schedule={schedule} client={c}/>);const button=screen.getByRole('button',{name:'Preview approved schedule'})

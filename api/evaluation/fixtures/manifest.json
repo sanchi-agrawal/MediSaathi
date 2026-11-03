@@ -1,0 +1,292 @@
+﻿{
+    "version":  1,
+    "fictional_only":  true,
+    "real_handwritten_samples":  0,
+    "fixtures":  [
+                     {
+                         "id":  "english_printed",
+                         "file":  "english_printed.png",
+                         "style":  "printed",
+                         "language":  "en",
+                         "synthetic":  true,
+                         "patient_data":  false,
+                         "lines":  [
+                                       "केवल परीक्षण — वास्तविक पर्चा नहीं",
+                                       "DEMO-C 5 mg tablet",
+                                       "Take 1 tablet once daily in the morning after food for 2 days.",
+                                       "Tests: DEMO-TEST",
+                                       "किसी व्यक्ति या उपचार के लिए नहीं।"
+                                   ],
+                         "expected_medicines":  [
+                                                    {
+                                                        "raw_text":  "DEMO-C 5 mg tablet\nTake 1 tablet once daily in the morning after food for 2 days.",
+                                                        "name":  "DEMO-C",
+                                                        "salt":  null,
+                                                        "strength":  "5 mg",
+                                                        "form":  "tablet",
+                                                        "frequency_pattern":  "once daily",
+                                                        "duration_days":  2,
+                                                        "timing":  "morning after food",
+                                                        "confidence":  null,
+                                                        "needs_review":  true
+                                                    }
+                                                ],
+                         "instruction_response":  {
+                                                      "instructions":  [
+                                                                           {
+                                                                               "medicine_name_raw":  "DEMO-C",
+                                                                               "raw_text":  "DEMO-C 5 mg tablet\nTake 1 tablet once daily in the morning after food for 2 days.",
+                                                                               "dose_quantity_raw":  "1",
+                                                                               "dose_unit_raw":  "tablet",
+                                                                               "frequency_raw":  "once daily",
+                                                                               "route_raw":  null,
+                                                                               "timing_raw":  "morning after food",
+                                                                               "duration_raw":  "2 days",
+                                                                               "uncertainty_reasons":  [
+
+                                                                                                       ],
+                                                                               "needs_review":  true
+                                                                           }
+                                                                       ],
+                                                      "issues":  [
+
+                                                                 ]
+                                                  },
+                         "investigation_response":  {
+                                                        "investigations":  [
+                                                                               {
+                                                                                   "test_name_raw":  "DEMO-TEST",
+                                                                                   "raw_text":  "Tests: DEMO-TEST",
+                                                                                   "order_context_raw":  "Tests",
+                                                                                   "specimen_raw":  null,
+                                                                                   "variant_raw":  null,
+                                                                                   "timing_raw":  null,
+                                                                                   "order_status":  "ordered",
+                                                                                   "uncertainty_reasons":  [
+
+                                                                                                           ],
+                                                                                   "needs_review":  true
+                                                                               }
+                                                                           ],
+                                                        "issues":  [
+
+                                                                   ]
+                                                    },
+                         "sha256":  "09dbd2e731a21ada5dcbe8973e935ec27ba90209245bde571db6ed74021eacb2"
+                     },
+                     {
+                         "id":  "hindi_printed",
+                         "file":  "hindi_printed.png",
+                         "style":  "printed",
+                         "language":  "hi",
+                         "synthetic":  true,
+                         "patient_data":  false,
+                         "lines":  [
+                                       "केवल परीक्षण — वास्तविक पर्चा नहीं",
+                                       "डेमो-ए १० मि.ग्रा. गोली",
+                                       "सुबह और रात १ गोली, खाने के बाद, दिन में २ बार, ५ दिन तक लें।",
+                                       "जाँच: नमूना-जाँच",
+                                       "किसी व्यक्ति या उपचार के लिए नहीं।"
+                                   ],
+                         "expected_medicines":  [
+                                                    {
+                                                        "raw_text":  "डेमो-ए १० मि.ग्रा. गोली\nसुबह और रात १ गोली, खाने के बाद, दिन में २ बार, ५ दिन तक लें।",
+                                                        "name":  "डेमो-ए",
+                                                        "salt":  null,
+                                                        "strength":  "१० मि.ग्रा.",
+                                                        "form":  "tablet",
+                                                        "frequency_pattern":  "दिन में २ बार",
+                                                        "duration_days":  5,
+                                                        "timing":  "सुबह और रात १ गोली, खाने के बाद",
+                                                        "confidence":  null,
+                                                        "needs_review":  true
+                                                    }
+                                                ],
+                         "instruction_response":  {
+                                                      "instructions":  [
+                                                                           {
+                                                                               "medicine_name_raw":  "डेमो-ए",
+                                                                               "raw_text":  "डेमो-ए १० मि.ग्रा. गोली\nसुबह और रात १ गोली, खाने के बाद, दिन में २ बार, ५ दिन तक लें।",
+                                                                               "dose_quantity_raw":  "१",
+                                                                               "dose_unit_raw":  "गोली",
+                                                                               "frequency_raw":  "दिन में २ बार",
+                                                                               "route_raw":  null,
+                                                                               "timing_raw":  "सुबह और रात १ गोली, खाने के बाद",
+                                                                               "duration_raw":  "५ दिन तक",
+                                                                               "uncertainty_reasons":  [
+
+                                                                                                       ],
+                                                                               "needs_review":  true
+                                                                           }
+                                                                       ],
+                                                      "issues":  [
+
+                                                                 ]
+                                                  },
+                         "investigation_response":  {
+                                                        "investigations":  [
+                                                                               {
+                                                                                   "test_name_raw":  "नमूना-जाँच",
+                                                                                   "raw_text":  "जाँच: नमूना-जाँच",
+                                                                                   "order_context_raw":  "जाँच",
+                                                                                   "specimen_raw":  null,
+                                                                                   "variant_raw":  null,
+                                                                                   "timing_raw":  null,
+                                                                                   "order_status":  "ordered",
+                                                                                   "uncertainty_reasons":  [
+
+                                                                                                           ],
+                                                                                   "needs_review":  true
+                                                                               }
+                                                                           ],
+                                                        "issues":  [
+
+                                                                   ]
+                                                    },
+                         "sha256":  "7d4b2a469d46b355a87c57288080ff42da6fab727d9daed9ce7f2dc01fcb499c"
+                     },
+                     {
+                         "id":  "mixed_printed",
+                         "file":  "mixed_printed.png",
+                         "style":  "printed",
+                         "language":  "hi-en",
+                         "synthetic":  true,
+                         "patient_data":  false,
+                         "lines":  [
+                                       "केवल परीक्षण — वास्तविक पर्चा नहीं",
+                                       "DEMO-B 20 mg tablet",
+                                       "सुबह, दोपहर, शाम और रात: 1 tablet, खाने से पहले, दिन में 4 बार, ३ दिन तक।",
+                                       "जाँच: DEMO-TEST",
+                                       "किसी व्यक्ति या उपचार के लिए नहीं।"
+                                   ],
+                         "expected_medicines":  [
+                                                    {
+                                                        "raw_text":  "DEMO-B 20 mg tablet\nसुबह, दोपहर, शाम और रात: 1 tablet, खाने से पहले, दिन में 4 बार, ३ दिन तक।",
+                                                        "name":  "DEMO-B",
+                                                        "salt":  null,
+                                                        "strength":  "20 mg",
+                                                        "form":  "tablet",
+                                                        "frequency_pattern":  "दिन में 4 बार",
+                                                        "duration_days":  3,
+                                                        "timing":  "सुबह, दोपहर, शाम और रात: 1 tablet, खाने से पहले",
+                                                        "confidence":  null,
+                                                        "needs_review":  true
+                                                    }
+                                                ],
+                         "instruction_response":  {
+                                                      "instructions":  [
+                                                                           {
+                                                                               "medicine_name_raw":  "DEMO-B",
+                                                                               "raw_text":  "DEMO-B 20 mg tablet\nसुबह, दोपहर, शाम और रात: 1 tablet, खाने से पहले, दिन में 4 बार, ३ दिन तक।",
+                                                                               "dose_quantity_raw":  "1",
+                                                                               "dose_unit_raw":  "tablet",
+                                                                               "frequency_raw":  "दिन में 4 बार",
+                                                                               "route_raw":  null,
+                                                                               "timing_raw":  "सुबह, दोपहर, शाम और रात: 1 tablet, खाने से पहले",
+                                                                               "duration_raw":  "३ दिन तक",
+                                                                               "uncertainty_reasons":  [
+
+                                                                                                       ],
+                                                                               "needs_review":  true
+                                                                           }
+                                                                       ],
+                                                      "issues":  [
+
+                                                                 ]
+                                                  },
+                         "investigation_response":  {
+                                                        "investigations":  [
+                                                                               {
+                                                                                   "test_name_raw":  "DEMO-TEST",
+                                                                                   "raw_text":  "जाँच: DEMO-TEST",
+                                                                                   "order_context_raw":  "जाँच",
+                                                                                   "specimen_raw":  null,
+                                                                                   "variant_raw":  null,
+                                                                                   "timing_raw":  null,
+                                                                                   "order_status":  "ordered",
+                                                                                   "uncertainty_reasons":  [
+
+                                                                                                           ],
+                                                                                   "needs_review":  true
+                                                                               }
+                                                                           ],
+                                                        "issues":  [
+
+                                                                   ]
+                                                    },
+                         "sha256":  "51f9959a0a5bd560e4b73d50d3e6279a85303c23a2aa93cd6c34732e26fd8e39"
+                     },
+                     {
+                         "id":  "hindi_handwriting_like",
+                         "file":  "hindi_handwriting_like.png",
+                         "style":  "synthetic_handwriting_like",
+                         "language":  "hi",
+                         "synthetic":  true,
+                         "patient_data":  false,
+                         "lines":  [
+                                       "कृत्रिम लिखावट जैसा परीक्षण — मानव हस्तलेख नहीं",
+                                       "डेमो-ए १० मि.ग्रा. गोली",
+                                       "सुबह और रात १ गोली, खाने के बाद, दिन में २ बार, ५ दिन तक लें।",
+                                       "जाँच: नमूना-जाँच",
+                                       "किसी व्यक्ति या उपचार के लिए नहीं।"
+                                   ],
+                         "expected_medicines":  [
+                                                    {
+                                                        "raw_text":  "डेमो-ए १० मि.ग्रा. गोली\nसुबह और रात १ गोली, खाने के बाद, दिन में २ बार, ५ दिन तक लें।",
+                                                        "name":  "डेमो-ए",
+                                                        "salt":  null,
+                                                        "strength":  "१० मि.ग्रा.",
+                                                        "form":  "tablet",
+                                                        "frequency_pattern":  "दिन में २ बार",
+                                                        "duration_days":  5,
+                                                        "timing":  "सुबह और रात १ गोली, खाने के बाद",
+                                                        "confidence":  null,
+                                                        "needs_review":  true
+                                                    }
+                                                ],
+                         "instruction_response":  {
+                                                      "instructions":  [
+                                                                           {
+                                                                               "medicine_name_raw":  "डेमो-ए",
+                                                                               "raw_text":  "डेमो-ए १० मि.ग्रा. गोली\nसुबह और रात १ गोली, खाने के बाद, दिन में २ बार, ५ दिन तक लें।",
+                                                                               "dose_quantity_raw":  "१",
+                                                                               "dose_unit_raw":  "गोली",
+                                                                               "frequency_raw":  "दिन में २ बार",
+                                                                               "route_raw":  null,
+                                                                               "timing_raw":  "सुबह और रात १ गोली, खाने के बाद",
+                                                                               "duration_raw":  "५ दिन तक",
+                                                                               "uncertainty_reasons":  [
+
+                                                                                                       ],
+                                                                               "needs_review":  true
+                                                                           }
+                                                                       ],
+                                                      "issues":  [
+
+                                                                 ]
+                                                  },
+                         "investigation_response":  {
+                                                        "investigations":  [
+                                                                               {
+                                                                                   "test_name_raw":  "नमूना-जाँच",
+                                                                                   "raw_text":  "जाँच: नमूना-जाँच",
+                                                                                   "order_context_raw":  "जाँच",
+                                                                                   "specimen_raw":  null,
+                                                                                   "variant_raw":  null,
+                                                                                   "timing_raw":  null,
+                                                                                   "order_status":  "ordered",
+                                                                                   "uncertainty_reasons":  [
+
+                                                                                                           ],
+                                                                                   "needs_review":  true
+                                                                               }
+                                                                           ],
+                                                        "issues":  [
+
+                                                                   ]
+                                                    },
+                         "not_human_handwriting":  true,
+                         "sha256":  "587759e8ed02e97755fc38afae1b893d7253d1ba487f759fc6a67b9d20ac36f7"
+                     }
+                 ]
+}

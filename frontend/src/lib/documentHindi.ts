@@ -1,0 +1,22 @@
+export const documentHindi:Record<string,string>={
+ 'Diagnostic reference: {0}':'जाँच संदर्भ: {0}',
+ 'Upload prescription':'पर्चा अपलोड करें',
+ 'Prescription document':'पर्चे की फ़ाइल',
+ 'PNG · JPG · PDF · DOCX · TXT · Gemini extraction stays on Python.':'PNG · JPG · PDF · DOCX · TXT · Gemini विश्लेषण Python सर्वर पर होता है।',
+ 'PNG · JPG · PDF · DOCX · TXT · UP TO 10 MiB':'PNG · JPG · PDF · DOCX · TXT · अधिकतम 10 MiB',
+ 'Document selected. Python validates and prepares the source when you analyze.':'फ़ाइल चुन ली गई है। विश्लेषण करते समय Python सर्वर इसकी जाँच और तैयारी करेगा।',
+ 'File selected. Server validation is still required.':'फ़ाइल चुन ली गई है। सर्वर पर जाँच अभी बाकी है।',
+ 'PDF: up to 3 pages. DOCX/TXT: UTF-8 text up to 256 KiB. Images keep their existing limits.':'PDF: अधिकतम 3 पन्ने। DOCX/TXT: अधिकतम 256 KiB UTF-8 पाठ। तस्वीरों की मौजूदा सीमाएँ लागू हैं।',
+ 'Choose a different file':'दूसरी फ़ाइल चुनें',
+ 'Checking your file…':'फ़ाइल की जाँच हो रही है…',
+ 'Analyzing prescription…':'पर्चे का विश्लेषण हो रहा है…',
+ 'Use PNG, JPG, PDF, DOCX or TXT.':'PNG, JPG, PDF, DOCX या TXT फ़ाइल चुनें।',
+ 'Files must be nonempty and no larger than 10 MiB.':'फ़ाइल खाली नहीं होनी चाहिए और 10 MiB से बड़ी नहीं हो सकती।',
+ 'This is not a valid PDF.':'यह मान्य PDF फ़ाइल नहीं है।',
+ 'This is not a valid DOCX.':'यह मान्य DOCX फ़ाइल नहीं है।',
+ 'Text must not exceed 256 KiB.':'पाठ 256 KiB से बड़ा नहीं होना चाहिए।',
+ 'TXT must use valid UTF-8 encoding.':'TXT फ़ाइल में मान्य UTF-8 पाठ होना चाहिए।',
+ 'The document is blank or contains unsupported binary text.':'फ़ाइल खाली है या इसमें असमर्थित बाइनरी सामग्री है।',
+ 'Extraction stopped after a service failure. Completed sections are preserved; other selected sections have not run.':'सेवा में त्रुटि के कारण विश्लेषण रुक गया। सफल हिस्से सुरक्षित हैं; बाकी चुने हुए हिस्सों का विश्लेषण नहीं हुआ।',
+ 'Only this explicit action sends the file to the Python server. The verified extraction mode determines whether Gemini is called.':'केवल यह बटन दबाने पर फ़ाइल Python सर्वर को भेजी जाती है। जाँचा गया विश्लेषण मोड तय करता है कि Gemini का उपयोग होगा या नहीं।'
+}

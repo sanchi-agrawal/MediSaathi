@@ -1,0 +1,13 @@
+// @vitest-environment jsdom
+import {afterEach,expect,it} from 'vitest'
+import {addDays,eventsFor,plannerKey,restorePlans,savePlans,validatePlan,validatePlans} from './manualPlanner'
+import type {ManualPlan} from './manualPlanner'
+const plan:ManualPlan={id:'dolo',name:'Dolo 650',quantity:1,unit:'tablet',days:5,start:'2026-11-03',times:['09:00']}
+afterEach(()=>sessionStorage.clear())
+it('counts the start date as day one and generates five once-daily entries ending November 7',()=>{const events=eventsFor([plan]);expect(events.map(e=>e.date)).toEqual(['2026-11-03','2026-11-04','2026-11-05','2026-11-06','2026-11-07']);expect(addDays(plan.start,plan.days-1)).toBe('2026-11-07')})
+it('creates exactly ten dose events at the two explicitly selected times',()=>{const events=eventsFor([{...plan,times:['21:00','09:00']}]);expect(events).toHaveLength(10);expect(events[0].time).toBe('09:00');expect(events[9]).toMatchObject({date:'2026-11-07',time:'21:00',quantity:1,unit:'tablet'})})
+it('keeps three medicine durations separate with shared dates',()=>{const events=eventsFor([{...plan,times:['09:00','21:00']},{...plan,id:'c',name:'Cetirizine',days:3},{...plan,id:'o',name:'Omeprazole',unit:'capsule',days:7}]);expect(events).toHaveLength(20);expect(events.filter(e=>e.date==='2026-11-03')).toHaveLength(4);expect(events.at(-1)).toMatchObject({name:'Omeprazole',date:'2026-11-09'})})
+it.each([['2026-01-30',4,'2026-02-02'],['2026-12-30',4,'2027-01-02'],['2028-02-28',3,'2028-03-01'],['2027-02-28',2,'2027-03-01'],['2026-03-07',3,'2026-03-09']])('handles month, year, leap-year and DST boundaries from %s',(start,days,end)=>{expect(addDays(start,Number(days)-1)).toBe(end)})
+it.each([{days:0},{days:1.5},{days:367},{quantity:0},{quantity:Infinity},{times:[]},{times:['09:00','09:00']},{times:['24:00']},{start:'2026-02-30'},{name:'   '}])('rejects invalid user entries %j',change=>{expect(()=>validatePlan({...plan,...change})).toThrow()})
+it('restores tab-local plans for the same account without exposing another account',()=>{expect(savePlans('A',[plan])).toBe(true);expect(restorePlans('A').plans).toEqual([plan]);expect(restorePlans('B').plans).toEqual([]);expect(restorePlans(null).plans).toEqual([]);expect(sessionStorage.getItem(plannerKey('A'))).not.toContain('token')})
+it('rejects corrupted/duplicate persisted plans and excessive event counts',()=>{sessionStorage.setItem(plannerKey('A'),'{bad json');expect(restorePlans('A').warning).toBe(true);expect(()=>validatePlans([plan,plan])).toThrow();expect(()=>validatePlans(Array.from({length:20},(_,i)=>({...plan,id:String(i),days:366,times:['09:00','12:00']})))).toThrow()})

@@ -39,7 +39,8 @@ def test_actual_reader_wraps_without_losing_captured_status(monkeypatch,tmp_path
     marker=tmp_path/"synthetic-attempt.json"
     client=client_for(create_smoke_app("live",result_path=marker))
     result=analyze(client,upload(client,FIXTURE.read_bytes()).json()).json()
-    assert result["status"] == "failed" and result["error"]["category"] == "api_error"
+    public_category={400:'provider_bad_request',401:'authentication_error',403:'permission_denied',404:'model_unavailable',422:'provider_error',429:'quota_exceeded',500:'provider_error',503:'provider_error'}.get(code,'extraction_timeout' if category=='network_timeout' else 'network_error')
+    assert result["status"] == "failed" and result["error"]["category"] == public_category
     diagnostics=json.loads(marker.read_text())["diagnostics"]
     assert diagnostics["category"] == category
     assert diagnostics["provider_http_status"] == code

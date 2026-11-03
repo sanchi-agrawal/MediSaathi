@@ -6,6 +6,9 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './styles.css'
 import './anatomy.css'
+import './bilingual.css'
+import './theme.css'
+import './lib/theme'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><BrowserRouter><App /></BrowserRouter></React.StrictMode>,

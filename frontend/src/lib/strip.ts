@@ -19,6 +19,8 @@ export interface StripEdits {
   date_observations:Pick<DateObservation,'raw_label'|'raw_date_text'|'raw_text'|'association'>[]
 }
 export interface StripSnapshot {
+  recognition_mode?:'gemini'|'offline_fixture'|'custom_extractor'
+  expiry_status?:{state:'expired'|'not_expired_by_date'|'unclear';as_of:string;rule:string}
   analysis_id:string;revision:string;scope:'strip';status:'not_requested'|'running'|'succeeded'|'failed'
   original_payload:StripPayload|null;payload:StripPayload|null
   reviewed:boolean;confirmed:boolean;error:{category:string;message:string}|null
@@ -45,6 +47,8 @@ export function validStrip(v:unknown):v is StripPayload {
 }
 export function parseStrip(v:unknown):StripSnapshot {
   const s=v as StripSnapshot
+  if(s?.expiry_status!==undefined&&(!['expired','not_expired_by_date','unclear'].includes(s.expiry_status.state)||s.expiry_status.rule!=='month-current-unclear-day-inclusive-v1'||!/^\d{4}-\d{2}-\d{2}$/.test(s.expiry_status.as_of)))throw new ApiError('invalid_response','Invalid expiry status.')
+  if(s?.recognition_mode!==undefined&&!['gemini','offline_fixture','custom_extractor'].includes(s.recognition_mode))throw new ApiError('invalid_response','Invalid strip recognition mode.')
   if(!s||typeof s.analysis_id!=='string'||typeof s.revision!=='string'||s.scope!=='strip'||!['not_requested','running','succeeded','failed'].includes(s.status)||typeof s.reviewed!=='boolean'||typeof s.confirmed!=='boolean'||!Number.isInteger(s.extractor_invocations)||s.extractor_invocations<0||
     ![s.payload,s.original_payload].every(p=>p===null||validStrip(p))||(s.status==='succeeded'&&(!s.payload||!s.original_payload))||
     !(s.error===null||(typeof s.error?.category==='string'&&typeof s.error?.message==='string')))throw new ApiError('invalid_response','Invalid strip extraction contract. No date was inferred.')

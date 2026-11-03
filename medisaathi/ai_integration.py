@@ -11,8 +11,9 @@ No Python library can prove a physical click or defend against malicious code
 holding that capability. One-use opaque tokens bind those trusted registrations;
 booleans, caller fingerprints and model flags cannot authorize a handoff.
 
-Only simple decimal doses, literal English named slots and integer day durations
-are eligible for the provisional schedule handoff. Fractions, ranges, tapers,
+Only simple decimal doses, literal English named slots or separately confirmed
+binary three-slot notation, and explicit integer day durations are eligible.
+Fractions, ranges, tapers,
 OD/PRN, unresolved conflicts and clock-to-slot conversion are deliberately blocked.
 Actual arithmetic belongs to Person 3. Downstream callables are trusted project
 functions, not arbitrary user code. No expiry status or safety claim is computed.
@@ -25,6 +26,7 @@ import math
 import re
 import threading
 import uuid
+from confirmed_count import literal_count
 from datetime import date
 from decimal import Decimal
 
@@ -33,6 +35,7 @@ import investigations
 import medication_instructions as medication
 import reader
 import strip
+from confirmed_frequency import explicit_days,canonical_unit,timing_proposal,engine_slot_flags,reviewed_semantic_timing
 
 SECTIONS = ("medicines", "instructions", "investigations")
 SCOPES = SECTIONS + ("strip",)
@@ -67,6 +70,18 @@ _UNSAFE_INSTRUCTIONS = {
 _UNSAFE_ORDERS = {"blurred", "clipped", "unreadable", "ordering_unclear", "variant_unclear",
                   "conflicting_source_text", "unsupported_source_value", "duplicate_entry",
                   "repeated_test_name", "potentially_conflicting_entries", "conflicting_order_mentions"}
+
+def _unsafe_instruction(envelope,item):
+    """Do not mistake the normalizer's record-error union for a global hazard.
+
+    Keep the linked record's every unsafe reason, unattributed section warnings,
+    and document-quality hazards even when repeated on individual records.
+    Source validation and confirmation checks remain separate and unchanged.
+    """
+    if set(item['uncertainty_reasons']) & _UNSAFE_INSTRUCTIONS:return True
+    record_reasons={reason for record in envelope['instructions'] for reason in record['uncertainty_reasons']}
+    global_reasons=(set(envelope['issues'])-record_reasons) | (set(envelope['issues']) & {'blurred','clipped','unreadable'})
+    return bool(global_reasons & _UNSAFE_INSTRUCTIONS)
 
 
 class IntegrationError(ValueError):
@@ -202,6 +217,19 @@ def _validate(scope, payload, image_hash):
 
 
 def _safe_error(error):
+    from extraction_errors import classify
+    provider_category=classify(error)
+    if provider_category:
+        messages={
+            'quota_exceeded':'Gemini quota or rate limit reached. No automatic retry was made.',
+            'authentication_error':'Gemini rejected the server credentials. Check server configuration.',
+            'permission_denied':'Gemini denied access. Check server permissions and model access.',
+            'model_unavailable':'The configured Gemini model or resource is unavailable.',
+            'provider_bad_request':'Gemini rejected the extraction request. Check the server diagnostics.',
+            'provider_error':'Gemini could not complete the request. No automatic retry was made.',
+            'extraction_timeout':'The Gemini request timed out. No automatic retry was made.',
+            'network_error':'The extraction service could not be reached. No automatic retry was made.'}
+        return {'category':provider_category,'message':messages[provider_category]}
     mappings = (
         ((reader.ReaderConfigurationError, medication.MedicationConfigurationError,
           investigations.InvestigationConfigurationError, strip.StripConfigurationError), "configuration_error"),
@@ -233,6 +261,12 @@ class FrontendEvents:
 
     def register_schedule_approval(self, link_id, plan):
         return self._adapter._register("schedule", "instructions", [link_id, plan])
+
+    def register_notation_confirmation(self, link_id):
+        return self._adapter._register('notation','instructions',link_id)
+
+    def register_slot_confirmation(self,link_id,slots):
+        return self._adapter._register('slots','instructions',[link_id,slots])
 
 
 class AIIntegration:
@@ -568,6 +602,17 @@ class AIIntegration:
             identity = uuid.uuid4().hex
             self._links[identity] = {"medicine_ref": medicine_ref, "medicine_index": refs[medicine_ref],
                 "instruction_id": instruction_id, "bindings": self._pair_binding()}
+            item=next(i for i in instructions if i['instruction_id']==instruction_id)
+            count=literal_count(meds[refs[medicine_ref]],item)
+            if count and not _unsafe_instruction(self._require('instructions'),item):
+                self._links[identity]['confirmed_count']=count
+            proposal=timing_proposal(meds[refs[medicine_ref]],item)
+            # Legacy literal timing was independently reviewed and is accepted
+            # by the genuine association action. Numeric convention needs its
+            # own acknowledgement; it is never approved by association alone.
+            if proposal and proposal['kind']=='literal' and not _unsafe_instruction(self._require('instructions'),item):
+                self._links[identity]['confirmed_slots']=proposal['slots']
+                self._links[identity]['checked_timing_source']=proposal['checked_source']
             return identity
 
     def clear_associations(self):
@@ -582,27 +627,74 @@ class AIIntegration:
                 if receipt[0] in ("associate", "schedule"):
                     del self._events[token]
 
-    def _schedule_request(self, link_id, plan):
+    def confirm_three_slot_notation(self,link_id,*,event):
+        """Trusted user action confirms the displayed slot meaning, never a dose."""
+        with self._lock:
+            self._require('medicines');envelope=self._require('instructions')
+            link=self._links.get(link_id)
+            if not link or link['bindings']!=self._pair_binding():raise IntegrationError('association_required')
+            item=next(i for i in envelope['instructions'] if i['instruction_id']==link['instruction_id'])
+            medicine=self._require('medicines')[link['medicine_index']]
+            if _unsafe_instruction(envelope,item):raise IntegrationError('unsafe_schedule')
+            proposal=timing_proposal(medicine,item)
+            if not proposal or proposal['kind']!='three_slot':raise IntegrationError('unsafe_schedule')
+            self._consume(event,'notation','instructions',link_id)
+            link['confirmed_slots']=proposal['slots']
+            link['checked_timing_source']=proposal['checked_source']
+
+    def confirm_named_slots(self,link_id,slots,*,event):
+        with self._lock:
+            meds=self._require('medicines');envelope=self._require('instructions');link=self._links.get(link_id)
+            if not link or link['bindings']!=self._pair_binding():raise IntegrationError('association_required')
+            item=next(i for i in envelope['instructions'] if i['instruction_id']==link['instruction_id'])
+            if _unsafe_instruction(envelope,item):raise IntegrationError('unsafe_schedule')
+            proposal=reviewed_semantic_timing(meds[link['medicine_index']],item)
+            if not proposal or type(slots) is not list or slots!=proposal['slots']:raise IntegrationError('unsafe_schedule')
+            self._consume(event,'slots','instructions',[link_id,slots])
+            link['confirmed_slots']=copy.deepcopy(slots);link['checked_timing_source']=proposal['checked_source']
+
+    def confirmed_named_slots(self,link_id):
+        with self._lock:
+            self._require('medicines');self._require('instructions');link=self._links.get(link_id)
+            if not link or link['bindings']!=self._pair_binding():raise IntegrationError('association_required')
+            return copy.deepcopy(link.get('confirmed_slots'))
+
+    def confirmed_daily_count(self,link_id):
+        with self._lock:
+            self._require('medicines');self._require('instructions')
+            link=self._links.get(link_id)
+            if not link or link['bindings']!=self._pair_binding():raise IntegrationError('association_required')
+            return copy.deepcopy(link.get('confirmed_count'))
+
+    def _schedule_request(self, link_id, plan, *,count_mode=False):
         meds, envelope = self._require("medicines"), self._require("instructions")
         if type(link_id) is not str or link_id not in self._links or self._links[link_id]["bindings"] != self._pair_binding():
             raise IntegrationError("association_required")
         link = self._links[link_id]
         medicine = meds[link["medicine_index"]]
         item = next(r for r in envelope["instructions"] if r["instruction_id"] == link["instruction_id"])
+        if not medicine.get('name'):raise IntegrationError('unsafe_schedule')
         required = {"dose_quantity", "dose_unit", "duration_days", "administrations_by_slot", "start_date"}
+        if count_mode:required=(required-{'administrations_by_slot'})|{'administrations_per_day'}
         try:
+            confirmed_slots=link.get('confirmed_slots')
+            count=link.get('confirmed_count') if count_mode else None
+            if count_mode:
+                if not count or type(plan.get('administrations_per_day')) is not int or plan['administrations_per_day']!=count['count']:raise ValueError
+                confirmed_flags=None
+            else:confirmed_flags=engine_slot_flags(confirmed_slots)
             _fingerprint(plan)
             if type(plan) is not dict or set(plan) != required:
                 raise ValueError
-            if set(item["uncertainty_reasons"]) & _UNSAFE_INSTRUCTIONS or set(envelope["issues"]) & _UNSAFE_INSTRUCTIONS:
+            if _unsafe_instruction(envelope,item):
                 raise ValueError
             source = item["raw_text"] or ""
+            danger_source=count['checked_source'] if count_mode else link.get('checked_timing_source')
+            if type(danger_source) is not str:raise ValueError
             if re.search(r"\b(?:then|taper|reduce|alternate|increase|decrease|if|or|not|except|SOS|PRN)\b|\d\s*[-–]\s*\d",
-                         source + " " + (medicine["raw_text"] or ""), re.IGNORECASE):
+                         danger_source, re.IGNORECASE):
                 raise ValueError
-            if not all(item[k] for k in ("raw_text", "dose_quantity_raw", "dose_unit_raw", "duration_raw", "timing_raw", "frequency_raw")):
-                raise ValueError
-            if item["frequency_raw"] not in ("BD", "BID", "TDS", "TID", "QID", "HS") or medicine["frequency_pattern"] != item["frequency_raw"]:
+            if not all(item[k] for k in ("raw_text", "dose_quantity_raw", "dose_unit_raw", "duration_raw")):
                 raise ValueError
             number = plan["dose_quantity"]
             if type(number) not in (int, float) or not math.isfinite(number) or number <= 0:
@@ -612,29 +704,23 @@ class AIIntegration:
             if Decimal(str(number)) != Decimal(item["dose_quantity_raw"]):
                 raise ValueError
             units = {"tablet": "tablet", "capsule": "capsule", "syrup": "mL", "drops": "drop"}
-            if plan["dose_unit"] != item["dose_unit_raw"] or plan["dose_unit"] != units.get(medicine["form"]):
+            if plan["dose_unit"] != canonical_unit(item["dose_unit_raw"]) or plan["dose_unit"] != units.get(medicine["form"]):
                 raise ValueError
             if not re.search(r"(?<![\w/])" + re.escape(item["dose_quantity_raw"]) + r"\s*"
                              + re.escape(item["dose_unit_raw"]) + r"(?![\w/])", source):
                 raise ValueError
-            duration = re.fullmatch(r"([1-9]\d*) days?", item["duration_raw"])
+            duration = explicit_days(item['duration_raw'])
             if (not duration or type(plan["duration_days"]) is not int
-                    or plan["duration_days"] != int(duration.group(1))
+                    or plan["duration_days"] != duration
                     or medicine["duration_days"] != plan["duration_days"]):
                 raise ValueError
-            slots = plan["administrations_by_slot"]
-            if (type(slots) is not dict or set(slots) != {"morning", "noon", "night", "bedtime"}
+            slots = None if count_mode else plan["administrations_by_slot"]
+            if not count_mode and (type(slots) is not dict or set(slots) != set(confirmed_flags)
                     or any(type(v) is not int or v not in (0, 1) for v in slots.values()) or not any(slots.values())):
                 raise ValueError
-            for slot, count in slots.items():
-                mentioned = bool(re.search(r"\b" + slot + r"\b", item["timing_raw"], re.IGNORECASE))
-                if count != int(mentioned):
-                    raise ValueError
-            expected_count = {"BD": 2, "BID": 2, "TDS": 3, "TID": 3, "QID": 4, "HS": 1}
-            if sum(slots.values()) != expected_count[item["frequency_raw"]]:
-                raise ValueError
-            if any(item[k] not in item["raw_text"] for k in (
-                    "dose_quantity_raw", "dose_unit_raw", "duration_raw", "frequency_raw", "timing_raw")):
+            if not count_mode and slots!=confirmed_flags:raise ValueError
+            if any(item[k] is not None and item[k] not in item["raw_text"] for k in (
+                    "dose_quantity_raw", "dose_unit_raw", "duration_raw", "timing_raw")):
                 raise ValueError
             if type(plan["start_date"]) is not str or date.fromisoformat(plan["start_date"]).isoformat() != plan["start_date"]:
                 raise ValueError
@@ -643,11 +729,12 @@ class AIIntegration:
         return {"analysis_id": self._prescription["analysis_id"],
                 "source_image_sha256": self._prescription["source_image_sha256"], "association_id": link_id,
                 "medicine_ref": link["medicine_ref"], "medicine": copy.deepcopy(medicine),
-                "instruction": copy.deepcopy(item), "plan": copy.deepcopy(plan)}
+                "instruction": copy.deepcopy(item), "plan": copy.deepcopy(plan),
+                "confirmed_slots":copy.deepcopy(confirmed_slots),**({'confirmed_count':count['count']} if count_mode else {})}
 
-    def schedule(self, link_id, plan, *, event):
+    def schedule(self, link_id, plan, *, event,count_mode=False):
         with self._lock:
-            request = self._schedule_request(link_id, plan)
+            request = self._schedule_request(link_id, plan,count_mode=count_mode)
             self._consume(event, "schedule", "instructions", [link_id, plan])
             expected = {s: self._binding(s) for s in ("medicines", "instructions")}
             epoch = uuid.uuid4().hex

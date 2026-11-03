@@ -20,6 +20,8 @@ from dotenv import dotenv_values
 from google import genai
 from google.genai import errors, types
 from PIL import Image, UnidentifiedImageError
+from prescription_language import MULTILINGUAL_GUIDE, guard_hindi_medicine
+from document_input import contents as extraction_contents
 
 
 # Private, request-local numeric telemetry. No source values or exception text
@@ -124,6 +126,8 @@ def normalize_model_response(response) -> list[dict]:
         review = normalized["needs_review"]
         if review is not None and type(review) is not bool:
             raise ModelResponseError(f"Record {index}: needs_review must be Boolean or None.")
+        guard_hindi_medicine(normalized)
+        review = normalized['needs_review']
         normalized["needs_review"] = (
             review is not False
             or any(normalized[field] is None for field in FIELDS if field != "needs_review")
@@ -169,6 +173,20 @@ quantities, schedules, dates or prices, or give medical advice. Return [] when
 no medicine lines are visible. Every record requires user confirmation even
 when needs_review is false. Do not invent records to satisfy this request.
 """
+SYSTEM_INSTRUCTION += MULTILINGUAL_GUIDE + '''
+Keep the full visible Hindi-English medicine line in raw_text. If a single
+English generic name is explicitly printed beside its Hindi name, use that
+printed English name for name; do not use the whole line as name. A printed
+Hindi मि.ग्रा. strength may be represented as mg only when the number and unit
+are clear. Do not copy dose, frequency, duration or food timing from another
+line into a medicine record unless it visibly belongs to that same medicine;
+the separate instruction extractor retains administration lines independently.
+For duration_days only, convert explicitly written positive day counts such as
+५ दिन तक to integer 5; preserve ५ in raw_text. Ranges, every-N-day frequencies,
+weeks, unclear counts or missing duration stay null. frequency_pattern and timing
+stay literal, never rewritten as BD or English timing. Canonical form enums may
+represent an explicit गोली/tablet, कैप्सूल/capsule, सिरप/syrup or बूंद/drops only.
+'''
 
 
 @_timed("image_validation_ms")
@@ -236,11 +254,10 @@ def read_prescription(image_bytes) -> list[dict]:
                 with _measure("gemini_request_ms"):
                     response = client.models.generate_content(
                         model=model,
-                        contents=[
+                        contents=extraction_contents(
                             "Extract the visible medicine lines." if attempt == 0 else
                             "Extract again; the previous response failed validation. Follow the schema exactly.",
-                            types.Part.from_bytes(data=image_bytes, mime_type=mime),
-                        ],
+                            image_bytes,mime,types),
                         config=types.GenerateContentConfig(
                             system_instruction=SYSTEM_INSTRUCTION,
                             response_mime_type="application/json",

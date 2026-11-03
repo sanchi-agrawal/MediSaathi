@@ -7,10 +7,11 @@ import Anatomy from '../components/Anatomy'
 import { setLanguage } from '../lib/language'
 vi.mock('three',async original=>({...await original<typeof import('three')>(),WebGLRenderer:class {constructor(){throw new Error('WebGL unavailable')}}}))
 afterEach(()=>{cleanup();setLanguage('en');localStorage.clear()})
+it('keeps three remaining feature cards with no Lab Costs promotion in either language',()=>{render(<MemoryRouter><Landing/></MemoryRouter>);expect(document.querySelectorAll('.core-features .feature-card')).toHaveLength(3);expect(document.querySelector('a[href="/dashboard/lab-costs"]')).toBeNull();expect(screen.queryByText('Lab costs')).toBeNull();fireEvent.click(screen.getByRole('button',{name:'हिंदी'}));expect(screen.queryByText('लैब जाँच का खर्च')).toBeNull();expect(document.querySelectorAll('.core-features .feature-card')).toHaveLength(3)})
 it('switches the full landing page and stores preference across remounts',async()=>{
  render(<MemoryRouter><Landing/></MemoryRouter>);fireEvent.click(screen.getByRole('button',{name:'हिंदी'}))
  expect(screen.getByRole('heading',{level:1}).textContent).toContain('अपनी दवाइयों को बेहतर समझें।')
- expect(screen.getByText('प्रिस्क्रिप्शन विश्लेषण')).toBeTruthy()
+ expect(screen.getByText('पर्चे का विश्लेषण')).toBeTruthy()
  expect(localStorage.getItem('medisaathi.interface-language')).toBe('hi')
  cleanup();render(<MemoryRouter><Landing/></MemoryRouter>);expect(screen.getByRole('button',{name:'हिंदी'}).getAttribute('aria-pressed')).toBe('true')
  fireEvent.click(screen.getByRole('button',{name:'English'}));expect(screen.getByText('Prescription analysis')).toBeTruthy()

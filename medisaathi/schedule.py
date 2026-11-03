@@ -161,7 +161,7 @@ def _normalise_unit(unit):
 
 # ---------- main entry point ----------
 
-def build_schedule(medicine, start_date):
+def build_schedule(medicine, start_date, confirmed_slots=None,*,confirmed_count=None):
     """medicine: confirmed record (dict). Returns a result dict with a status:
     'ok', 'as_needed' or 'needs_input' (with a reason to show the user)."""
     if not isinstance(start_date, date):
@@ -179,7 +179,19 @@ def build_schedule(medicine, start_date):
         return needs("Still marked 'needs review'. Check this medicine and clear the flag.")
 
     try:
-        kind, slots = parse_pattern(medicine.get("frequency_pattern"))
+        if confirmed_count is not None:
+            if confirmed_slots is not None or type(confirmed_count) is not int or not 1<=confirmed_count<=5:
+                raise ScheduleError('Confirmed administration count is invalid.')
+            kind='confirmed_count';slots=tuple(f'administration_{i+1}' for i in range(confirmed_count))
+        elif confirmed_slots is not None:
+            # Canonical API handoff: never inspect frequency_pattern here.
+            allowed={'morning','afternoon','evening','night','bedtime'}
+            if type(confirmed_slots) is not list or not confirmed_slots or any(type(s) is not str or s not in allowed for s in confirmed_slots) or len(set(confirmed_slots))!=len(confirmed_slots):
+                raise ScheduleError('Confirmed named timing slots are invalid.')
+            kind='confirmed'
+            slots=tuple('noon' if s=='afternoon' else s for s in confirmed_slots)
+        else:
+            kind, slots = parse_pattern(medicine.get("frequency_pattern"))
         if kind == "as_needed":
             return {**base, "status": "as_needed",
                     "reason": "As needed: no fixed schedule. Follow your doctor's advice."}
@@ -200,15 +212,16 @@ def build_schedule(medicine, start_date):
             if solid and unit != solid:
                 raise ScheduleError(
                     f"Form is {solid} but dose unit is {unit}. Please check.")
-            if kind == "abbr":
-                doses = {s: (qty if s in slots else Fraction(0)) for s in SLOTS}
+            if kind in ("abbr","confirmed","confirmed_count"):
+                output_slots=slots if kind=='confirmed_count' else SLOTS+['evening'] if kind=='confirmed' and 'evening' in slots else SLOTS
+                doses = {s: (qty if s in slots else Fraction(0)) for s in output_slots}
             else:  # numeric pattern: only 0/1 flags allowed alongside an explicit dose
                 if any(v not in (0, 1) for v in slots.values()):
                     raise ScheduleError(
                         "Frequency and dose quantity conflict. Please check both.")
                 doses = {s: qty * v for s, v in slots.items()}
         else:
-            if kind == "abbr":
+            if kind in ("abbr","confirmed","confirmed_count"):
                 raise ScheduleError(
                     "Dose quantity not written. Please enter how much per dose.")
             if not solid:

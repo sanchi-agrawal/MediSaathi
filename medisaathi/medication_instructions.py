@@ -19,6 +19,9 @@ from google import genai
 from google.genai import errors, types
 
 import reader
+from confirmed_frequency import canonical_pattern,pattern_occurs
+from prescription_language import MULTILINGUAL_GUIDE, has_devanagari, hindi_flags, is_mass_unit
+from document_input import contents as extraction_contents
 
 SCHEMA_VERSION = "medication-instructions-v1"
 TEXT_FIELDS = ("medicine_name_raw", "raw_text", "dose_quantity_raw", "dose_unit_raw",
@@ -116,7 +119,7 @@ def _dose_supported(text, quantity, unit):
     if unit:
         paired = bool(re.search(r"(?<![\w/])" + q + r"\s*" + re.escape(unit)
                                 + r"(?![\w/])", text))
-        if unit.casefold() in {"mg", "g", "mcg", "µg", "μg", "milligram", "milligrams"}:
+        if is_mass_unit(unit):
             return cued and paired
     return cued or paired
 
@@ -173,11 +176,17 @@ def normalize_medication_instructions_response(response, *, source_image_sha256:
                 item[field] = None
         text = item["raw_text"]
         for field in TEXT_FIELDS:
-            if field != "raw_text" and item[field] is not None and (text is None or item[field] not in text):
+            # Format-only frequency evidence is not a clinical interpretation:
+            # retain both literal strings; scheduling still needs separate scope,
+            # association and notation confirmations. Never fill a missing value.
+            pattern_evidence=field=='frequency_raw' and canonical_pattern(item[field]) and pattern_occurs(text,item[field])
+            if field != "raw_text" and item[field] is not None and (text is None or item[field] not in text) and not pattern_evidence:
                 item[field] = None
                 reasons.add("unsupported_source_value")
         if text is None:
             reasons.add("missing_source_text")
+        elif has_devanagari(text) and item['dose_quantity_raw'] and re.fullmatch(r'[?？_\s]+',item['dose_quantity_raw']):
+            item['dose_quantity_raw']=None;item['dose_unit_raw']=None;reasons.add('ambiguous_dose')
         elif item["dose_quantity_raw"] is not None and not _dose_supported(
                 text, item["dose_quantity_raw"], item["dose_unit_raw"]):
             item["dose_quantity_raw"] = None
@@ -201,6 +210,8 @@ def normalize_medication_instructions_response(response, *, source_image_sha256:
         if quantity and (re.search(r"\d\s*[-–]\s*\d", quantity)
                          or re.search(r"\bor\b", quantity, re.IGNORECASE)):
             reasons.add("variable_dose")
+        reasons.update(hindi_flags(text,item['frequency_raw'],item['duration_raw'],item['dose_quantity_raw']))
+        if has_devanagari(text):item['needs_review']=True
         item["instruction_id"] = f"instruction_{index:03}"
         item["confirmation_required"] = True
         item["uncertainty_reasons"] = list(reasons)
@@ -251,6 +262,13 @@ Every result will require explicit user confirmation outside this response.
 """
 
 
+SYSTEM_INSTRUCTION += MULTILINGUAL_GUIDE + '''
+Keep dose_quantity_raw and duration_raw as exact substrings, including १ and ५.
+Do not translate गोली to tablet or सुबह to morning in raw instruction fields.
+Hindi mass units such as मि.ग्रा. remain strengths unless an explicit separate
+administration quantity is visibly supported. Never expand Hindi abbreviations.
+'''
+
 def read_medication_instructions(image_bytes: bytes) -> dict:
     """Validate input, transcribe through Gemini, and normalize once per response.
 
@@ -274,9 +292,9 @@ def read_medication_instructions(image_bytes: bytes) -> dict:
             for attempt in range(2):
                 response = client.models.generate_content(
                     model=model,
-                    contents=["Transcribe visible medication instructions." if attempt == 0 else
+                    contents=extraction_contents("Transcribe visible medication instructions." if attempt == 0 else
                               "Transcribe again; the previous response failed schema validation.",
-                              types.Part.from_bytes(data=image_bytes, mime_type=mime)],
+                              image_bytes,mime,types),
                     config=types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION,
                         response_mime_type="application/json", response_json_schema=RESPONSE_SCHEMA, temperature=0))
                 try:
